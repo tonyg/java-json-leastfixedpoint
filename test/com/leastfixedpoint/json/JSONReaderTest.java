@@ -148,7 +148,12 @@ public class JSONReaderTest {
                 "trondheim",
                 "flase",
                 "nil",
-                "\"\\?\""
+                "\"\\?\"",
+                "/* invalid */123",
+                "/* invalid */\n123",
+                "/- invalid\n123",
+                "}",
+                "]"
         }) {
             try {
                 JSONReader.readFrom(str);
@@ -166,15 +171,5 @@ public class JSONReaderTest {
         assert r.read().equals(234.0);
         try { r.read(); } catch (EOFException ee) { return; }
         assert false : "Expected EOF exception";
-    }
-
-    @Test(expectedExceptions = {JSONSyntaxError.class})
-    public void testInvalidComment1() throws IOException {
-        JSONReader.readFrom("/* invalid */\n 123");
-    }
-
-    @Test(expectedExceptions = {JSONSyntaxError.class})
-    public void testInvalidComment2() throws IOException {
-        JSONReader.readFrom("/- invalid\n 123");
     }
 }

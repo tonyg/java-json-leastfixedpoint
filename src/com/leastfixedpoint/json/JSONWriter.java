@@ -68,17 +68,19 @@ public class JSONWriter {
     /**
      * Returns JSON text corresponding to value, without pretty indentation.
      */
-    public static String writeToString(Object value) {
+    public static String writeToString(Object value) throws JSONSerializationError {
         return writeToString(value, false);
     }
 
     /**
      * Returns JSON text corresponding to value, with optional pretty indentation.
      */
-    public static String writeToString(Object value, boolean indenting) {
+    public static String writeToString(Object value, boolean indenting) throws JSONSerializationError {
         StringWriter w = new StringWriter();
         try {
             writeTo(w, value, indenting);
+        } catch (JSONSerializationError jse) {
+            throw jse;
         } catch (IOException e) {
             throw new RuntimeException("IOException while writing to string buffer", e);
         }

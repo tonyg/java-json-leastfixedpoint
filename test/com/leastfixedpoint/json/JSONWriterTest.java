@@ -10,18 +10,18 @@ import java.util.Map;
 import static org.testng.Assert.*;
 
 public class JSONWriterTest {
-    public void checkWrite(Object o, String expected) {
+    public void checkWrite(Object o, String expected) throws JSONSerializationError {
         String actual = JSONWriter.writeToString(o);
         assert actual.equals(expected) : "Actual >>>" + actual + "<<< =/= >>>" + expected + "<<<";
     }
 
-    public void checkWriteIndented(Object o, String expected) {
+    public void checkWriteIndented(Object o, String expected) throws JSONSerializationError {
         String actual = JSONWriter.writeToString(o, true);
         assert actual.equals(expected) : "Actual >>>" + actual + "<<< =/= >>>" + expected + "<<<";
     }
 
     @Test
-    public void testNumbers() {
+    public void testNumbers() throws JSONSerializationError {
         checkWrite(0, "0");
         checkWrite(123.0, "123");
         checkWrite(123.125, "123.125");
@@ -35,7 +35,7 @@ public class JSONWriterTest {
     }
 
     @Test
-    public void testStrings() {
+    public void testStrings() throws JSONSerializationError {
         checkWrite("123", "\"123\"");
         checkWrite("", "\"\"");
         checkWrite("\\", "\"\\\\\"");
@@ -46,14 +46,14 @@ public class JSONWriterTest {
     }
 
     @Test
-    public void testSimple() {
+    public void testSimple() throws JSONSerializationError {
         checkWrite(true, "true");
         checkWrite(false, "false");
         checkWrite(null, "null");
     }
 
     @Test
-    public void testArray() {
+    public void testArray() throws JSONSerializationError {
         checkWrite(new Object[] {}, "[]");
         checkWrite(new Object[] {1.0, null, "C"}, "[1,null,\"C\"]");
         List<Object> a = new ArrayList<>();
@@ -65,7 +65,7 @@ public class JSONWriterTest {
     }
 
     @Test
-    public void testMap() {
+    public void testMap() throws JSONSerializationError {
         checkWrite(new HashMap(), "{}");
         Map<String,Object> m = new HashMap<>();
         m.put("a", 123.0);
@@ -87,5 +87,17 @@ public class JSONWriterTest {
                 "    \"y\":false\n" +
                 "  }\n" +
                 "}");
+    }
+
+    @Test(expectedExceptions = {JSONSerializationError.class})
+    public void testInvalidObject1() throws JSONSerializationError {
+        checkWrite(new Object(), "uh oh this shouldn't yield any answer");
+    }
+
+    @Test(expectedExceptions = {JSONSerializationError.class})
+    public void testInvalidObject2() throws JSONSerializationError {
+        Map<Object,Object> m = new HashMap<>();
+        m.put(123, 123.0);
+        checkWrite(m, "uh oh this shouldn't yield any answer");
     }
 }
