@@ -1,5 +1,7 @@
 build/
 doc/
+test-output/
+out/
 
 .idea/
 *.iml

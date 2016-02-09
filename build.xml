@@ -1,18 +1,37 @@
 <?xml version="1.0"?>
 <project name="java-json-leastfixedpoint" default="all">
-  <path id="javac.classpath">
+  <target name="all" depends="test,jar,javadoc">
+  </target>
+
+  <property name="testng.jar" value="lib/testng/testng-6.9.10.jar"/>
+
+  <taskdef resource="testngtasks" classpath="${testng.jar}"/>
+
+  <path id="test.classpath">
+    <fileset dir="lib/testng">
+      <include name="**/*.jar"/>
+    </fileset>
+    <pathelement path="build/classes/main"/>
+    <pathelement path="build/classes/test"/>
   </path>
 
-  <target name="all" depends="jar,javadoc">
+  <target name="test" depends="build">
+    <mkdir dir="build/classes/test"/>
+    <javac destdir="build/classes/test" classpathref="test.classpath" debug="true">
+      <src path="test"/>
+    </javac>
+    <testng classpathref="test.classpath">
+      <classfileset dir="build/classes/test" includes="**/*.class"/>
+    </testng>
   </target>
 
   <target name="build">
     <mkdir dir="build/classes/main"/>
-    <javac destdir="build/classes/main" classpathref="javac.classpath" debug="true">
+    <javac destdir="build/classes/main" debug="true">
       <src path="src"/>
     </javac>
     <mkdir dir="build/classes/examples"/>
-    <javac destdir="build/classes/examples" classpathref="javac.classpath" debug="true">
+    <javac destdir="build/classes/examples" debug="true">
       <classpath path="build/classes/main"/>
       <src path="examples"/>
     </javac>
@@ -24,7 +43,7 @@
   </target>
 
   <target name="javadoc">
-    <javadoc destdir="doc" classpathref="javac.classpath" access="public">
+    <javadoc destdir="doc" access="public">
       <sourcepath path="src"/>
       <sourcepath path="examples"/>
     </javadoc>
@@ -34,5 +53,6 @@
     <delete dir="build"/>
     <delete dir="doc"/>
     <delete dir="out"/>
+    <delete dir="test-output"/>
   </target>
 </project>
