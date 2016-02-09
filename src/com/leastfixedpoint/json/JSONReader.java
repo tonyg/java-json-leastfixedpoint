@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,19 +49,6 @@ import java.util.Map;
  * Syntax errors are reported with JSONSyntaxError or, in case of short input, EOFException.
  */
 public class JSONReader {
-    protected static final Map<Character, Character> escapes = new HashMap<>();
-
-    static {
-        escapes.put('"', '"');
-        escapes.put('\\', '\\');
-        escapes.put('/', '/');
-        escapes.put('b', '\b');
-        escapes.put('f', '\f');
-        escapes.put('n', '\n');
-        escapes.put('r', '\r');
-        escapes.put('t', '\t');
-    }
-
     private final StringBuilder buf = new StringBuilder();
     protected LineNumberReader reader;
     protected int buffer = -1;
@@ -268,13 +256,23 @@ public class JSONReader {
                 if (checkDrop('u')) {
                     shiftUnicode();
                 } else {
-                    Character value = escapes.get(curr());
-                    if (value != null) {
-                        buf.append(value.charValue());
-                        drop();
-                    } else {
-                        throw new JSONSyntaxError("Invalid string escape >>>" + curr() + "<<<", reader.getLineNumber());
+                    int replacement = -1;
+                    switch (curr()) {
+                        case '"': replacement = '"'; break;
+                        case '\\': replacement = '\\'; break;
+                        case '/': replacement = '/'; break;
+
+                        case 'b': replacement = '\b'; break;
+                        case 'f': replacement = '\f'; break;
+                        case 'n': replacement = '\n'; break;
+                        case 'r': replacement = '\r'; break;
+                        case 't': replacement = '\t'; break;
+                        default:
+                            throw new JSONSyntaxError("Invalid string escape >>>" + curr() + "<<<",
+                                    reader.getLineNumber());
                     }
+                    drop();
+                    buf.append((char) replacement);
                 }
             } else {
                 shift();
