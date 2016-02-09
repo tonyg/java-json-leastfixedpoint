@@ -52,7 +52,13 @@ public class JSONEchoServer implements Runnable {
 
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        } finally {
+	    try {
+		this.sock.close();
+	    } catch (IOException e) {
+		e.printStackTrace();
+	    }
+	}
         System.out.println("Connection terminated " + this.sock);
     }
 }
