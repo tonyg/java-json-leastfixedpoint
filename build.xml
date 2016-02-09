@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<project name="java-json-leastfixedpoint" default="all">
+  <path id="javac.classpath">
+  </path>
+
+  <target name="all" depends="jar,javadoc">
+  </target>
+
+  <target name="build">
+    <mkdir dir="build/classes/main"/>
+    <javac destdir="build/classes/main" classpathref="javac.classpath" debug="true">
+      <src path="src"/>
+    </javac>
+    <mkdir dir="build/classes/examples"/>
+    <javac destdir="build/classes/examples" classpathref="javac.classpath" debug="true">
+      <classpath path="build/classes/main"/>
+      <src path="examples"/>
+    </javac>
+  </target>
+
+  <target name="jar" depends="build">
+    <mkdir dir="build/lib"/>
+    <jar destfile="build/lib/com.leastfixedpoint.json.jar" basedir="build/classes/main" />
+  </target>
+
+  <target name="javadoc">
+    <javadoc destdir="doc" classpathref="javac.classpath" access="public">
+      <sourcepath path="src"/>
+      <sourcepath path="examples"/>
+    </javadoc>
+  </target>
+
+  <target name="clean">
+    <delete dir="build"/>
+    <delete dir="doc"/>
+    <delete dir="out"/>
+  </target>
+</project>
