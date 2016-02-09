@@ -11,46 +11,51 @@ import java.util.Map;
 import static org.testng.Assert.*;
 
 public class JSONReaderTest {
+    public void checkRead(String source, Object expected) throws IOException {
+	Object actual = JSONReader.readFrom(source);
+	assert actual.equals(expected) : "Actual >>>" + actual + "<<< =/= >>>" + expected + "<<<";
+    }
+
     @Test
     public void testNumbers() throws IOException {
-        assert JSONReader.readFrom("0").equals(0.0);
-        assert JSONReader.readFrom("0.0000e0").equals(0.0);
-        assert JSONReader.readFrom("123").equals(123.0);
-        assert JSONReader.readFrom("123.0").equals(123.0);
-        assert JSONReader.readFrom("123.125").equals(123.125);
-        assert JSONReader.readFrom("-123").equals(-123.0);
-        assert JSONReader.readFrom("-123.125").equals(-123.125);
-        assert JSONReader.readFrom("-123e2").equals(-12300.0);
-        assert JSONReader.readFrom("-123.125e2").equals(-12312.5);
-        assert JSONReader.readFrom("-123.125e-2").equals(-1.23125);
-        assert JSONReader.readFrom("-1.23E09").equals(-1.23E09);
-        assert JSONReader.readFrom("-1.23e9").equals(-1.23E09);
-        assert JSONReader.readFrom("-1.23E+09").equals(-1.23E09);
-        assert JSONReader.readFrom("1.23E+09").equals(1.23E09);
-        assert JSONReader.readFrom("1.23E09").equals(1.23E09);
-        assert JSONReader.readFrom("1.23E9").equals(1.23E09);
-        assert JSONReader.readFrom("1.23e9").equals(1.23E09);
-        assert JSONReader.readFrom("-1.23E-13").equals(-1.23E-13);
-        assert JSONReader.readFrom("1.23E-13").equals(1.23E-13);
+        checkRead("0", 0.0);
+        checkRead("0.0000e0", 0.0);
+        checkRead("123", 123.0);
+        checkRead("123.0", 123.0);
+        checkRead("123.125", 123.125);
+        checkRead("-123", -123.0);
+        checkRead("-123.125", -123.125);
+        checkRead("-123e2", -12300.0);
+        checkRead("-123.125e2", -12312.5);
+        checkRead("-123.125e-2", -1.23125);
+        checkRead("-1.23E09", -1.23E09);
+        checkRead("-1.23e9", -1.23E09);
+        checkRead("-1.23E+09", -1.23E09);
+        checkRead("1.23E+09", 1.23E09);
+        checkRead("1.23E09", 1.23E09);
+        checkRead("1.23E9", 1.23E09);
+        checkRead("1.23e9", 1.23E09);
+        checkRead("-1.23E-13", -1.23E-13);
+        checkRead("1.23E-13", 1.23E-13);
     }
 
     @Test
     public void testStrings() throws IOException {
-        assert JSONReader.readFrom("\"123\"").equals("123");
-        assert JSONReader.readFrom("\"\"").equals("");
-        assert JSONReader.readFrom("\"\\\\\"").equals("\\");
-        assert JSONReader.readFrom("\"\\\"\"").equals("\"");
-        assert JSONReader.readFrom("\"x\\\"x\"").equals("x\"x");
-        assert JSONReader.readFrom("\"\n\"").equals("\n");
-        assert JSONReader.readFrom("\"\\n\"").equals("\n");
-        assert JSONReader.readFrom("\"\\uD834\\udd1e\"").equals("\uD834\uDD1E");
-        assert JSONReader.readFrom("\"\uD834\udd1e\"").equals("\uD834\uDD1E");
+        checkRead("\"123\"", "123");
+        checkRead("\"\"", "");
+        checkRead("\"\\\\\"", "\\");
+        checkRead("\"\\\"\"", "\"");
+        checkRead("\"x\\\"x\"", "x\"x");
+        checkRead("\"\n\"", "\n");
+        checkRead("\"\\n\"", "\n");
+        checkRead("\"\\uD834\\udd1e\"", "\uD834\uDD1E");
+        checkRead("\"\uD834\udd1e\"", "\uD834\uDD1E");
     }
 
     @Test
     public void testSimple() throws IOException {
-        assert JSONReader.readFrom("true").equals(true);
-        assert JSONReader.readFrom("false").equals(false);
+        checkRead("true", true);
+        checkRead("false", false);
         assert JSONReader.readFrom("null") == null;
     }
 
