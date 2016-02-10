@@ -45,6 +45,7 @@ public class JSONWriterTest {
         checkWrite("x\"x", "\"x\\\"x\"");
         checkWrite("\n", "\"\\n\"");
         checkWrite("\uD834\uDD1E", "\"\uD834\udd1e\"");
+        checkWrite("\u0080", "\"\\u0080\"");
     }
 
     @Test

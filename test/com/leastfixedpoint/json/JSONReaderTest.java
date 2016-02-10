@@ -50,6 +50,7 @@ public class JSONReaderTest {
         checkRead("\"\\n\"", "\n");
         checkRead("\"\\uD834\\udd1e\"", "\uD834\uDD1E");
         checkRead("\"\uD834\udd1e\"", "\uD834\uDD1E");
+        checkRead("\"\\u0080\"", "\u0080");
     }
 
     @Test
