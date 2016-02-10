@@ -29,6 +29,9 @@ import java.io.Writer;
 import java.lang.reflect.Array;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -50,6 +53,7 @@ public class JSONWriter {
     protected int indentLevel = 0;
     protected Writer writer;
     protected boolean indentMode;
+    protected boolean sortKeys = true;
 
     /**
      * Serializes value as JSON, outputting to writer, without pretty indentation.
@@ -124,6 +128,20 @@ public class JSONWriter {
     }
 
     /**
+     * Answers true iff the writer sorts keys when writing objects, to ensure deterministic ordering.
+     */
+    public boolean getSortKeys() {
+        return sortKeys;
+    }
+
+    /**
+     * If given true, enables object key-sorting on write; false disables sorting.
+     */
+    public void setSortKeys(boolean value) {
+        sortKeys = value;
+    }
+
+    /**
      * If pretty indentation is turned on, outputs a newline character followed by a number of spaces
      * corresponding to the current indentation level (which is not under direct control of any public methods)
      */
@@ -166,19 +184,45 @@ public class JSONWriter {
         indentLevel += 2;
         newline();
         boolean needComma = false;
-        for (Map.Entry<?, ?> entry : map.entrySet()) {
-            if (needComma) {
-                emit(',');
-                newline();
+
+        if (sortKeys) {
+            ArrayList<String> sortedKeys = new ArrayList<>(map.size());
+            for (Object key : map.keySet()) {
+                if (!(key instanceof String)) {
+                    throw new JSONSerializationError("Cannot write non-string JSON map key: " + key);
+                }
+                sortedKeys.add((String) key);
             }
-            needComma = true;
-            emit('"');
-            Object key = entry.getKey();
-            if (!(key instanceof String)) throw new JSONSerializationError("Cannot write non-string JSON map key: " + key);
-            emit(key);
-            emit("\":");
-            write(entry.getValue());
+            Collections.sort(sortedKeys);
+            for (String key : sortedKeys) {
+                if (needComma) {
+                    emit(',');
+                    newline();
+                }
+                needComma = true;
+                emit('"');
+                emit(key);
+                emit("\":");
+                write(map.get(key));
+            }
+        } else {
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                if (needComma) {
+                    emit(',');
+                    newline();
+                }
+                needComma = true;
+                emit('"');
+                Object key = entry.getKey();
+                if (!(key instanceof String)) {
+                    throw new JSONSerializationError("Cannot write non-string JSON map key: " + key);
+                }
+                emit((String) key);
+                emit("\":");
+                write(entry.getValue());
+            }
         }
+
         indentLevel -= 2;
         newline();
         emit('}');

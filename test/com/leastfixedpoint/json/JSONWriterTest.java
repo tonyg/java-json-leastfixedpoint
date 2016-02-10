@@ -2,6 +2,8 @@ package com.leastfixedpoint.json;
 
 import org.testng.annotations.Test;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -103,6 +105,36 @@ public class JSONWriterTest {
                 "}");
     }
 
+    @Test
+    public void testMapUnsorted() throws IOException {
+        Map<String,Object> m = new HashMap<>();
+        m.put("a", 123.0);
+        m.put("b", new Object[] { JSONNull.INSTANCE });
+
+        JSONWriter jw = new JSONWriter(new StringWriter());
+        jw.setSortKeys(false);
+        jw.write(m);
+        String actual = ((StringWriter) jw.getWriter()).getBuffer().toString();
+        assert actual.equals("{\"a\":123,\"b\":[null]}") ||
+                actual.equals("{\"b\":[null],\"a\":123}");
+
+        m.put("b", 234.0);
+        jw = new JSONWriter(new StringWriter());
+        jw.setSortKeys(false);
+        jw.write(m);
+        actual = ((StringWriter) jw.getWriter()).getBuffer().toString();
+        assert actual.equals("{\"a\":123,\"b\":234}") ||
+                actual.equals("{\"b\":234,\"a\":123}");
+    }
+
+    @Test(expectedExceptions = {JSONSerializationError.class})
+    public void testWriteNullInMap() throws JSONSerializationError {
+        Map<String,Object> m = new HashMap<>();
+        m.put("a", 123.0);
+        m.put("b", new Object[] { null });
+        checkWrite(m, "{\"a\":123,\"b\":[null]}");
+    }
+
     @Test(expectedExceptions = {JSONSerializationError.class})
     public void testInvalidObject1() throws JSONSerializationError {
         checkWrite(new Object(), "uh oh this shouldn't yield any answer");
@@ -113,5 +145,14 @@ public class JSONWriterTest {
         Map<Object,Object> m = new HashMap<>();
         m.put(123, 123.0);
         checkWrite(m, "uh oh this shouldn't yield any answer");
+    }
+
+    @Test(expectedExceptions = {JSONSerializationError.class})
+    public void testInvalidObject3() throws IOException {
+        Map<Object,Object> m = new HashMap<>();
+        m.put(123, 123.0);
+        JSONWriter jw = new JSONWriter(new StringWriter());
+        jw.setSortKeys(false);
+        jw.write(m);
     }
 }
