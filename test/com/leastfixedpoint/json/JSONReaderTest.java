@@ -56,7 +56,7 @@ public class JSONReaderTest {
     public void testSimple() throws IOException {
         checkRead("true", true);
         checkRead("false", false);
-        assert JSONReader.readFrom("null") == null;
+        assert JSONReader.readFrom("null") == JSONNull.INSTANCE;
     }
 
     @Test
@@ -66,12 +66,12 @@ public class JSONReaderTest {
         a = (ArrayList) JSONReader.readFrom("[1,null,\"C\"]");
         assert a.size() == 3;
         assert a.get(0).equals(1.0);
-        assert a.get(1) == null;
+        assert a.get(1) == JSONNull.INSTANCE;
         assert a.get(2).equals("C");
         a = (ArrayList) JSONReader.readFrom("[1, null,\n\"C\"]");
         assert a.size() == 3;
         assert a.get(0).equals(1.0);
-        assert a.get(1) == null;
+        assert a.get(1) == JSONNull.INSTANCE;
         assert a.get(2).equals("C");
         a = (ArrayList) JSONReader.readFrom("[ [ [] ] ]");
         assert a.size() == 1;
@@ -92,7 +92,7 @@ public class JSONReaderTest {
         assert m.size() == 2;
         assert m.get("a").equals(123.0);
         assert m.get("b") instanceof ArrayList;
-        assert ((ArrayList) m.get("b")).get(0) == null;
+        assert ((ArrayList) m.get("b")).get(0) == JSONNull.INSTANCE;
         m = (Map) JSONReader.readFrom("{\"a\":123,\"b\":234}");
         assert m.size() == 2;
         assert m.get("a").equals(123.0);

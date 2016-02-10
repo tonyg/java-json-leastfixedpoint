@@ -40,7 +40,7 @@ import java.util.Map;
  * <ul>
  *     <li>JSON strings are represented as java.lang.String.</li>
  *     <li>JSON true and false are represented as java.lang.Boolean.</li>
- *     <li>JSON null is represented as Java null.</li>
+ *     <li>JSON null is represented as com.leastfixedpoint.json.JSONNull.INSTANCE.</li>
  *     <li>JSON numbers are represented as Java java.lang.Double.</li>
  *     <li>JSON arrays are represented as java.util.List.</li>
  *     <li>JSON maps/objects are represented as java.util.Map.</li>
@@ -170,7 +170,7 @@ public class JSONReader {
             case '}': drop(); return Lexeme.OBJECT_END;
             case 't': return readAtom("true", Boolean.TRUE);
             case 'f': return readAtom("false", Boolean.FALSE);
-            case 'n': return readAtom("null", null);
+            case 'n': return readAtom("null", JSONNull.INSTANCE);
             default:
                 if (Character.isDigit(curr()) || check('-')) {
                     return number();

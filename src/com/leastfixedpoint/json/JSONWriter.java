@@ -37,7 +37,7 @@ import java.util.Map;
  * <ul>
  *     <li>java.lang.String becomes a JSON string.</li>
  *     <li>java.lang.Boolean become JSON booleans.</li>
- *     <li>Java's null becomes JSON null.</li>
+ *     <li>com.leastfixedpoint.json.JSONNull.INSTANCE becomes JSON null.</li>
  *     <li>java.lang.Number and subclasses become JSON numbers (via double).</li>
  *     <li>Java arrays and Iterable objects become JSON arrays.</li>
  *     <li>java.util.Map objects become JSON objects/maps.</li>
@@ -138,7 +138,7 @@ public class JSONWriter {
      * Emit the given object as JSON to the embedded Writer.
      */
     public void write(Object object) throws IOException {
-        if (object == null) emit("null");
+        if (object instanceof JSONNull) emit("null");
         else if (object instanceof JSONSerializable) {
             ((JSONSerializable) object).jsonSerialize(this);
         } else if (object instanceof Class) string(object);
@@ -147,8 +147,8 @@ public class JSONWriter {
         else if (object instanceof String) string(object);
         else if (object instanceof Character) string(object);
         else if (object instanceof Map) map((Map<?, ?>) object);
-        else if (object.getClass().isArray()) array(object);
         else if (object instanceof Iterable) iterable((Iterable<?>) object);
+        else if (object != null && object.getClass().isArray()) array(object);
         else throw new JSONSerializationError("Cannot write object in JSON format: " + object);
     }
 

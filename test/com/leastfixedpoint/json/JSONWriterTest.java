@@ -49,19 +49,33 @@ public class JSONWriterTest {
     public void testSimple() throws JSONSerializationError {
         checkWrite(true, "true");
         checkWrite(false, "false");
-        checkWrite(null, "null");
+        checkWrite(JSONNull.INSTANCE, "null");
     }
 
     @Test
     public void testArray() throws JSONSerializationError {
         checkWrite(new Object[] {}, "[]");
-        checkWrite(new Object[] {1.0, null, "C"}, "[1,null,\"C\"]");
+        checkWrite(new Object[] {1.0, JSONNull.INSTANCE, "C"}, "[1,null,\"C\"]");
+        List<Object> a = new ArrayList<>();
+        a.add(1.0);
+        a.add(JSONNull.INSTANCE);
+        a.add("C");
+        checkWrite(a, "[1,null,\"C\"]");
+        checkWrite(new Object[] { new Object[] { new Object [] {} } }, "[[[]]]");
+    }
+
+    @Test(expectedExceptions = {JSONSerializationError.class})
+    public void testWriteNullInArray() throws JSONSerializationError {
+        checkWrite(new Object[]{1.0, null, "C"}, "[1,null,\"C\"]");
+    }
+
+    @Test(expectedExceptions = {JSONSerializationError.class})
+    public void testWriteNullInArrayList() throws JSONSerializationError {
         List<Object> a = new ArrayList<>();
         a.add(1.0);
         a.add(null);
         a.add("C");
         checkWrite(a, "[1,null,\"C\"]");
-        checkWrite(new Object[] { new Object[] { new Object [] {} } }, "[[[]]]");
     }
 
     @Test
@@ -70,7 +84,7 @@ public class JSONWriterTest {
         Map<String,Object> m = new HashMap<>();
         m.put("a", 123.0);
         checkWrite(m, "{\"a\":123}");
-        m.put("b", new Object[] { null });
+        m.put("b", new Object[] { JSONNull.INSTANCE });
         checkWrite(m, "{\"a\":123,\"b\":[null]}");
         m.put("b", 234.0);
         checkWrite(m, "{\"a\":123,\"b\":234}");
