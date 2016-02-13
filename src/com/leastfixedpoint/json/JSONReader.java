@@ -40,7 +40,7 @@ import java.util.Map;
  * <ul>
  *     <li>JSON strings are represented as java.lang.String.</li>
  *     <li>JSON true and false are represented as java.lang.Boolean.</li>
- *     <li>JSON null is represented as com.leastfixedpoint.json.JSONNull.INSTANCE.</li>
+ *     <li>JSON null is represented as {@link JSONNull#INSTANCE}.</li>
  *     <li>JSON numbers are represented as Java java.math.BigDecimal.</li>
  *     <li>JSON arrays are represented as java.util.List.</li>
  *     <li>JSON maps/objects are represented as java.util.Map.</li>
@@ -57,6 +57,9 @@ import java.util.Map;
  * <p>
  * Furthermore, when given a Reader that is not a LineNumberReader, this class creates a wrapping LineNumberReader,
  * which may internally consume input from the underlying reader in a way not under our control.
+ * <p>
+ * Finally, this class can be used as a simple SAX-style JSON tokenizer; see {@link JSONReader#nextLexeme()} and the
+ * class {@link JSONEventReader}.
  */
 public class JSONReader {
     private final StringBuilder buf = new StringBuilder();
@@ -161,7 +164,7 @@ public class JSONReader {
                     while (!atEOF() && !check('\n')) drop();
                     continue;
                 }
-                throw new JSONSyntaxError("Invalid comment", reader.getLineNumber());
+                syntaxError("Invalid comment");
             }
             break;
         }
@@ -169,7 +172,7 @@ public class JSONReader {
 
     protected Object valueGuard(Object value) throws JSONSyntaxError {
         if (value instanceof Lexeme) {
-            throw new JSONSyntaxError("Unexpected lexeme " + value.toString(), reader.getLineNumber());
+            unexpectedLexeme((Lexeme) value);
         }
         return value;
     }
@@ -198,7 +201,7 @@ public class JSONReader {
     public void expectEOF() throws IOException {
         skipWhiteSpace();
         if (!atEOF()) {
-            throw new JSONSyntaxError("Expected, but did not see, end-of-file", reader.getLineNumber());
+            syntaxError("Expected, but did not see, end-of-file");
         }
     }
 
@@ -206,13 +209,18 @@ public class JSONReader {
         for (int i = 0; i < atom.length(); i++) {
             if (!checkDrop(atom.charAt(i))) {
                 if (atEOF()) throw new EOFException();
-                throw new JSONSyntaxError("Invalid input parsing '" + atom + "'", reader.getLineNumber());
+                syntaxError("Invalid input parsing '" + atom + "'");
             }
         }
         return value;
     }
 
-    protected Object _read() throws IOException {
+    /**
+     * Read the next JSON token from the input stream. Strings, numbers, booleans and null are returned as the
+     * Java representations of their JSON values, as described in the class comment for this class. Array and
+     * object delimiters are returned as instances of {@link Lexeme}. Throws EOFException at the end of the input.
+     */
+    public Object nextLexeme() throws IOException {
         skipWhiteSpace();
         switch (curr()) {
             case '"': // fall through
@@ -220,20 +228,34 @@ public class JSONReader {
                 char sep = curr();
                 drop();
                 return string(sep);
-            case '[': drop(); return array();
+            case '[': drop(); return Lexeme.ARRAY_START;
             case ',': drop(); return Lexeme.COMMA;
             case ']': drop(); return Lexeme.ARRAY_END;
-            case '{': drop(); return object();
+            case '{': drop(); return Lexeme.OBJECT_START;
             case ':': drop(); return Lexeme.COLON;
             case '}': drop(); return Lexeme.OBJECT_END;
             case 't': return readAtom("true", Boolean.TRUE);
             case 'f': return readAtom("false", Boolean.FALSE);
             case 'n': return readAtom("null", JSONNull.INSTANCE);
             default:
-                if (Character.isDigit(curr()) || check('-')) {
-                    return number();
-                }
-                throw new JSONSyntaxError("Invalid character: >>>" + curr() + "<<<", reader.getLineNumber());
+                if (!(Character.isDigit(curr()) || check('-'))) syntaxError("Invalid character: {" + curr() + "}");
+                return number();
+        }
+    }
+
+    protected Object _read() throws IOException {
+        Object lexeme = nextLexeme();
+        if (lexeme instanceof Lexeme) {
+            switch ((Lexeme) lexeme) {
+                case ARRAY_START:
+                    return array();
+                case OBJECT_START:
+                    return object();
+                default:
+                    return lexeme;
+            }
+        } else {
+            return lexeme;
         }
     }
 
@@ -245,10 +267,10 @@ public class JSONReader {
         }
         while (true) {
             if (!(_key instanceof String)) {
-                throw new JSONSyntaxError("Expected string map key", reader.getLineNumber());
+                expectedMapKey();
             }
             if (_read() != Lexeme.COLON) {
-                throw new JSONSyntaxError("Expected colon separating key from value", reader.getLineNumber());
+                expectedMapColon();
             }
             ret.put((String) _key, read());
             _key = _read();
@@ -256,7 +278,7 @@ public class JSONReader {
                 return ret;
             }
             if (_key != Lexeme.COMMA) {
-                throw new JSONSyntaxError("Expected comma separating map keys", reader.getLineNumber());
+                expectedMapComma();
             }
             _key = _read();
         }
@@ -275,7 +297,7 @@ public class JSONReader {
                 return ret;
             }
             if (_value != Lexeme.COMMA) {
-                throw new JSONSyntaxError("Expected comma separating array values", reader.getLineNumber());
+                expectedArrayComma();
             }
             _value = _read();
         }
@@ -325,9 +347,7 @@ public class JSONReader {
                         case 'n': replacement = '\n'; break;
                         case 'r': replacement = '\r'; break;
                         case 't': replacement = '\t'; break;
-                        default:
-                            throw new JSONSyntaxError("Invalid string escape >>>" + curr() + "<<<",
-                                    reader.getLineNumber());
+                        default: syntaxError("Invalid string escape {" + curr() + "}");
                     }
                     drop();
                     buf.append((char) replacement);
@@ -372,8 +392,37 @@ public class JSONReader {
         buf.append((char) value);
     }
 
-    protected enum Lexeme {
+    void unexpectedLexeme(Lexeme value) throws JSONSyntaxError {
+        syntaxError("Unexpected lexeme " + value.toString());
+    }
+
+    void expectedMapComma() throws JSONSyntaxError {
+        syntaxError("Expected comma separating map keys or end of map");
+    }
+
+    void expectedMapColon() throws JSONSyntaxError {
+        syntaxError("Expected colon separating key from value");
+    }
+
+    void expectedMapKey() throws JSONSyntaxError {
+        syntaxError("Expected string map key");
+    }
+
+    void expectedArrayComma() throws JSONSyntaxError {
+        syntaxError("Expected comma separating array values or end of array");
+    }
+
+    void syntaxError(String message) throws JSONSyntaxError {
+        throw new JSONSyntaxError(message, this.reader.getLineNumber());
+    }
+
+    /**
+     * Most JSON tokens are self-representing; the remainder are represented with instances of Lexeme.
+     */
+    public enum Lexeme {
+        OBJECT_START,
         OBJECT_END,
+        ARRAY_START,
         ARRAY_END,
         COLON,
         COMMA

@@ -2,13 +2,15 @@ package com.leastfixedpoint.json;
 
 import org.testng.annotations.Test;
 
-import java.io.*;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.LineNumberReader;
+import java.io.Reader;
+import java.io.StringReader;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import static org.testng.Assert.*;
 
 public class JSONReaderTest {
     public void checkRead(String source, Object expected) throws IOException {
