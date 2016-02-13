@@ -2,6 +2,7 @@
 title: "com.leastfixedpoint.json"
 layout: skeleton
 projecturl: "https://github.com/tonyg/java-json-leastfixedpoint"
+docurl: "doc/"
 ---
 A package for JSON reading and writing for Java.
 
@@ -13,11 +14,11 @@ It offers:
  - both DOM-style ([JSONReader][]) and SAX-style ([JSONEventReader][]) parsing of JSON input
  - a helper class, [JSONValue][], for interrogating and manipulating representations of JSON values
 
-[JSONReader]: /doc/com/leastfixedpoint/json/JSONReader.html
-[JSONwriter]: /doc/com/leastfixedpoint/json/JSONWriter.html
+[JSONReader]: doc/com/leastfixedpoint/json/JSONReader.html
+[JSONwriter]: doc/com/leastfixedpoint/json/JSONWriter.html
 [example]: https://github.com/tonyg/java-json-leastfixedpoint/tree/master/examples/com/leastfixedpoint/json/examples/JSONEchoServer.java
-[JSONEventReader]: /doc/com/leastfixedpoint/json/JSONEventReader.html
-[JSONValue]: /doc/com/leastfixedpoint/json/JSONValue.html
+[JSONEventReader]: doc/com/leastfixedpoint/json/JSONEventReader.html
+[JSONValue]: doc/com/leastfixedpoint/json/JSONValue.html
 
 ### License
 
