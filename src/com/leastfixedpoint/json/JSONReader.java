@@ -186,7 +186,7 @@ public class JSONReader {
     }
 
     /**
-     * As read(), but wraps the result in JSONValue.
+     * As read(), but wraps the result in {@link JSONValue}.
      */
     public JSONValue readValue() throws IOException {
         return JSONValue.wrap(read());

@@ -8,7 +8,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * SAX-style event-emitting JSON parser.
+ * SAX-style event-emitting JSON parser. Only needed in advanced situations. Usually, {@link JSONReader} will
+ * be what you're looking for.
+ * <p>
+ * If you do decide you want SAX-style events rather than finished, ready-to-use JSON-representing objects from
+ * {@link JSONReader#read()} or {@link JSONReader#readValue()}, then instantiate this class and call
+ * {@link JSONEventReader#next()} repeatedly until you're done or it returns null. It will return tokens as follows:
+ * <ul>
+ *     <li>Strings, numbers, booleans, and null JSON values are returned directly, following the type mapping
+ *     documented in the class comment for {@link JSONReader}.</li>
+ *     <li>An object will be presented as {@link JSONReader.Lexeme#OBJECT_START}. Subsequent calls to next()
+ *     will alternate between returning keys (strings) and values (possibly complex token sequences) until the
+ *     object is closed by {@link JSONReader.Lexeme#OBJECT_END}.</li>
+ *     <li>Similarly, an array appears as {@link JSONReader.Lexeme#ARRAY_START} followed by values (as possibly
+ *     complex token sequences) until the end of the array, signalled by {@link JSONReader.Lexeme#ARRAY_END}.</li>
+ * </ul>
  */
 public class JSONEventReader {
     protected JSONReader jsonReader;
