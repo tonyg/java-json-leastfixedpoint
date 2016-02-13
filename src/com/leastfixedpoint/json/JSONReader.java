@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.Reader;
 import java.io.StringReader;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +41,7 @@ import java.util.Map;
  *     <li>JSON strings are represented as java.lang.String.</li>
  *     <li>JSON true and false are represented as java.lang.Boolean.</li>
  *     <li>JSON null is represented as com.leastfixedpoint.json.JSONNull.INSTANCE.</li>
- *     <li>JSON numbers are represented as Java java.lang.Double.</li>
+ *     <li>JSON numbers are represented as Java java.math.BigDecimal.</li>
  *     <li>JSON arrays are represented as java.util.List.</li>
  *     <li>JSON maps/objects are represented as java.util.Map.</li>
  * </ul>
@@ -299,7 +300,7 @@ public class JSONReader {
             shiftDigits();
         }
 
-        return new Double(buf.toString());
+        return new BigDecimal(buf.toString());
     }
 
     /**

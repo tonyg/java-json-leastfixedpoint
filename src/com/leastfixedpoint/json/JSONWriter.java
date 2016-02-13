@@ -41,7 +41,7 @@ import java.util.Map;
  *     <li>java.lang.String becomes a JSON string.</li>
  *     <li>java.lang.Boolean become JSON booleans.</li>
  *     <li>com.leastfixedpoint.json.JSONNull.INSTANCE becomes JSON null.</li>
- *     <li>java.lang.Number and subclasses become JSON numbers (via double).</li>
+ *     <li>java.lang.Number and subclasses become JSON numbers (via BigDecimal).</li>
  *     <li>Java arrays and Iterable objects become JSON arrays.</li>
  *     <li>java.util.Map objects become JSON objects/maps.</li>
  * </ul>

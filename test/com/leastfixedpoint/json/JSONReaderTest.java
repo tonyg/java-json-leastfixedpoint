@@ -3,6 +3,7 @@ package com.leastfixedpoint.json;
 import org.testng.annotations.Test;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,27 +16,37 @@ public class JSONReaderTest {
         assert actual.equals(expected) : "Actual >>>" + actual + "<<< =/= >>>" + expected + "<<<";
     }
 
+    // Convenience specifically for simple number checks
+    public void checkNumber(String source, double expected) throws IOException {
+        JSONValue v = JSONValue.wrap(JSONReader.readFrom(source));
+        assert v.doubleValue() == expected : "Actual >>>" + v + "<<< =/= >>>" + expected + "<<<";
+    }
+
     @Test
     public void testNumbers() throws IOException {
-        checkRead("0", 0.0);
-        checkRead("0.0000e0", 0.0);
-        checkRead("123", 123.0);
-        checkRead("123.0", 123.0);
-        checkRead("123.125", 123.125);
-        checkRead("-123", -123.0);
-        checkRead("-123.125", -123.125);
-        checkRead("-123e2", -12300.0);
-        checkRead("-123.125e2", -12312.5);
-        checkRead("-123.125e-2", -1.23125);
-        checkRead("-1.23E09", -1.23E09);
-        checkRead("-1.23e9", -1.23E09);
-        checkRead("-1.23E+09", -1.23E09);
-        checkRead("1.23E+09", 1.23E09);
-        checkRead("1.23E09", 1.23E09);
-        checkRead("1.23E9", 1.23E09);
-        checkRead("1.23e9", 1.23E09);
-        checkRead("-1.23E-13", -1.23E-13);
-        checkRead("1.23E-13", 1.23E-13);
+        checkNumber("0", 0.0);
+        checkNumber("0.0000e0", 0.0);
+        checkNumber("123", 123.0);
+        checkNumber("123.0", 123.0);
+        checkNumber("123.125", 123.125);
+        checkNumber("-123", -123.0);
+        checkNumber("-123.125", -123.125);
+        checkNumber("-123e2", -12300.0);
+        checkNumber("-123.125e2", -12312.5);
+        checkNumber("-123.125e-2", -1.23125);
+        checkNumber("-1.23E09", -1.23E09);
+        checkNumber("-1.23e9", -1.23E09);
+        checkNumber("-1.23E+09", -1.23E09);
+        checkNumber("1.23E+09", 1.23E09);
+        checkNumber("1.23E09", 1.23E09);
+        checkNumber("1.23E9", 1.23E09);
+        checkNumber("1.23e9", 1.23E09);
+        checkNumber("-1.23E-13", -1.23E-13);
+        checkNumber("1.23E-13", 1.23E-13);
+        assert JSONReader.readFrom("1234567890123456789012345678901234567890")
+            .equals(new BigDecimal("1234567890123456789012345678901234567890"));
+        assert JSONReader.readFrom("1E+40").equals(new BigDecimal("1e40"));
+        assert JSONReader.readFrom("1e40").equals(new BigDecimal("1e40"));
     }
 
     @Test
@@ -65,12 +76,12 @@ public class JSONReaderTest {
         assert a.size() == 0;
         a = (ArrayList) JSONReader.readFrom("[1,null,\"C\"]");
         assert a.size() == 3;
-        assert a.get(0).equals(1.0);
+        assert a.get(0).equals(BigDecimal.ONE);
         assert a.get(1) == JSONNull.INSTANCE;
         assert a.get(2).equals("C");
         a = (ArrayList) JSONReader.readFrom("[1, null,\n\"C\"]");
         assert a.size() == 3;
-        assert a.get(0).equals(1.0);
+        assert a.get(0).equals(BigDecimal.ONE);
         assert a.get(1) == JSONNull.INSTANCE;
         assert a.get(2).equals("C");
         a = (ArrayList) JSONReader.readFrom("[ [ [] ] ]");
@@ -102,16 +113,16 @@ public class JSONReaderTest {
         assert m.size() == 0;
         m = (Map) JSONReader.readFrom("{\"a\": 123}");
         assert m.size() == 1;
-        assert m.get("a").equals(123.0);
+        assert m.get("a").equals(new BigDecimal(123.0));
         m = (Map) JSONReader.readFrom("{\"a\": 123, \"b\": [null]}");
         assert m.size() == 2;
-        assert m.get("a").equals(123.0);
+        assert m.get("a").equals(new BigDecimal(123.0));
         assert m.get("b") instanceof ArrayList;
         assert ((ArrayList) m.get("b")).get(0) == JSONNull.INSTANCE;
         m = (Map) JSONReader.readFrom("{\"a\":123,\"b\":234}");
         assert m.size() == 2;
-        assert m.get("a").equals(123.0);
-        assert m.get("b").equals(234.0);
+        assert m.get("a").equals(new BigDecimal(123.0));
+        assert m.get("b").equals(new BigDecimal(234.0));
     }
 
     @Test
@@ -200,8 +211,8 @@ public class JSONReaderTest {
     @Test
     public void testComments() throws IOException {
         JSONReader r = new JSONReader(new StringReader("// starting\n123 // ending\n234"));
-        assert r.read().equals(123.0);
-        assert r.read().equals(234.0);
+        assert r.read().equals(new BigDecimal(123.0));
+        assert r.read().equals(new BigDecimal(234.0));
         try { r.read(); } catch (EOFException ee) { return; }
         assert false : "Expected EOF exception";
     }
@@ -220,7 +231,7 @@ public class JSONReaderTest {
     public void demoInternalBuffer1() throws IOException {
         Reader r = new LineNumberReader(new StringReader("123xy"));
         JSONReader jsonReader = new JSONReader(r);
-        assert jsonReader.read().equals(123.0);
+        assert jsonReader.read().equals(new BigDecimal(123.0));
         assert r.read() == 'y';
 
         r = new LineNumberReader(new StringReader("[1,2]xy"));
@@ -236,7 +247,7 @@ public class JSONReaderTest {
         assert jsonReader.read().equals(false);
         assert jsonReader.read() instanceof List<?>;
         assert jsonReader.read() instanceof Map<?,?>;
-        assert jsonReader.read().equals(123.0);
+        assert jsonReader.read().equals(new BigDecimal(123.0));
         assert jsonReader.read().equals(JSONNull.INSTANCE);
         jsonReader.expectEOF();
 
@@ -245,7 +256,7 @@ public class JSONReaderTest {
         assert jsonReader.read().equals(false);
         assert jsonReader.read() instanceof List<?>;
         assert jsonReader.read() instanceof Map<?,?>;
-        assert jsonReader.read().equals(123.0);
+        assert jsonReader.read().equals(new BigDecimal(123.0));
         assert jsonReader.read().equals(JSONNull.INSTANCE);
         jsonReader.expectEOF();
     }
@@ -260,7 +271,7 @@ public class JSONReaderTest {
                         "    \"y\":false\n" +
                         "  }\n" +
                         "}");
-        assert m.get("a").equals(123.0);
+        assert m.get("a").equals(new BigDecimal(123.0));
         m = (Map<String, Object>) m.get("b");
         assert m.get("x").equals(true);
         assert m.get("y").equals(false);

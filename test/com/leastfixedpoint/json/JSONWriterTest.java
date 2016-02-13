@@ -4,6 +4,7 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,6 +36,11 @@ public class JSONWriterTest {
         checkWrite(-1.23E-13, "-1.23E-13");
         checkWrite(1.23E-13, "1.23E-13");
         checkWrite(JSONValue.wrap(1.23E-13), "1.23E-13");
+        checkWrite(new BigDecimal("1000000000000000000000000000000000000000"),
+                "1000000000000000000000000000000000000000");
+        checkWrite(new BigDecimal("1e40"), "1E+40");
+        checkWrite(new BigDecimal("1234567890123456789012345678901234567890"),
+                "1234567890123456789012345678901234567890");
     }
 
     @Test

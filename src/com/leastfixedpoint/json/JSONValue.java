@@ -1,6 +1,8 @@
 package com.leastfixedpoint.json;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 
 /**
@@ -48,6 +50,13 @@ public class JSONValue implements JSONSerializable {
     public double doubleValue() throws JSONTypeError {
         if (blob instanceof Number) return ((Number) blob).doubleValue();
         throw new JSONTypeError(Number.class, blob);
+    }
+
+    // Is this a good idea?
+    public BigDecimal bigDecimalValue() throws JSONTypeError {
+        if (blob instanceof BigDecimal) return ((BigDecimal) blob);
+        if (blob instanceof BigInteger) return new BigDecimal((BigInteger) blob);
+        throw new JSONTypeError(new Class[] { BigDecimal.class, BigInteger.class }, blob);
     }
 
     public boolean booleanValue() throws JSONTypeError {
@@ -115,5 +124,10 @@ public class JSONValue implements JSONSerializable {
     @Override
     public void jsonSerialize(JSONWriter w) throws IOException {
         w.write(blob);
+    }
+
+    @Override
+    public String toString() {
+        return blob.toString();
     }
 }
