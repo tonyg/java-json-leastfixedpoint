@@ -2,18 +2,17 @@ package com.leastfixedpoint.json;
 
 import org.testng.annotations.Test;
 
-import java.io.EOFException;
-import java.io.IOException;
-import java.io.StringReader;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static org.testng.Assert.*;
 
 public class JSONReaderTest {
     public void checkRead(String source, Object expected) throws IOException {
-	Object actual = JSONReader.readFrom(source);
-	assert actual.equals(expected) : "Actual >>>" + actual + "<<< =/= >>>" + expected + "<<<";
+        Object actual = JSONReader.readFrom(source);
+        assert actual.equals(expected) : "Actual >>>" + actual + "<<< =/= >>>" + expected + "<<<";
     }
 
     @Test
@@ -83,6 +82,21 @@ public class JSONReaderTest {
     }
 
     @Test
+    public void testArrayValue() throws IOException {
+        JSONValue a = JSONValue.wrap(JSONReader.readFrom("[]"));
+        assert a.size() == 0;
+        a = JSONValue.wrap(JSONReader.readFrom("[1,null,\"C\"]"));
+        assert a.size() == 3;
+        assert a.get(0).doubleValue() == 1.0;
+        a.get(1).checkNull();
+        assert a.get(2).stringValue().equals("C");
+        a = JSONValue.wrap(JSONReader.readFrom("[ [ [] ] ]"));
+        assert a.size() == 1;
+        assert a.get(0).size() == 1;
+        assert a.get(0).get(0).size() == 0;
+    }
+
+    @Test
     public void testMap() throws IOException {
         Map m = (Map) JSONReader.readFrom("{}");
         assert m.size() == 0;
@@ -98,6 +112,24 @@ public class JSONReaderTest {
         assert m.size() == 2;
         assert m.get("a").equals(123.0);
         assert m.get("b").equals(234.0);
+    }
+
+    @Test
+    public void testMapValue() throws IOException {
+        JSONValue m = JSONValue.wrap(JSONReader.readFrom("{}"));
+        assert m.size() == 0;
+        m = JSONValue.wrap(JSONReader.readFrom("{\"a\": 123}"));
+        assert m.size() == 1;
+        assert m.get("a").longValue() == 123;
+        assert m.get("a").doubleValue() == 123.0;
+        m = JSONValue.wrap(JSONReader.readFrom("{\"a\": 123, \"b\": [null]}"));
+        assert m.size() == 2;
+        assert m.get("a").doubleValue() == 123.0;
+        m.get("b").get(0).checkNull();
+        m = JSONValue.wrap(JSONReader.readFrom("{\"a\":123,\"b\":234}"));
+        assert m.size() == 2;
+        assert m.get("a").doubleValue() == 123.0;
+        assert m.get("b").doubleValue() == 234.0;
     }
 
     @Test
@@ -172,5 +204,65 @@ public class JSONReaderTest {
         assert r.read().equals(234.0);
         try { r.read(); } catch (EOFException ee) { return; }
         assert false : "Expected EOF exception";
+    }
+
+    @Test(expectedExceptions = {JSONSyntaxError.class})
+    public void testTrailingData1() throws IOException {
+        checkRead("true love waits", "you had me at 'true'");
+    }
+
+    @Test
+    public void testTrailingData2() throws IOException {
+        assert JSONReader.readFrom("true love waits", false).equals(true);
+    }
+
+    @Test
+    public void demoInternalBuffer1() throws IOException {
+        Reader r = new LineNumberReader(new StringReader("123xy"));
+        JSONReader jsonReader = new JSONReader(r);
+        assert jsonReader.read().equals(123.0);
+        assert r.read() == 'y';
+
+        r = new LineNumberReader(new StringReader("[1,2]xy"));
+        jsonReader = new JSONReader(r);
+        assert jsonReader.read() instanceof List<?>;
+        assert r.read() == 'y';
+    }
+
+    @Test
+    public void testMultiple() throws IOException {
+        JSONReader jsonReader = new JSONReader(new StringReader("truefalse[]{}123null"));
+        assert jsonReader.read().equals(true);
+        assert jsonReader.read().equals(false);
+        assert jsonReader.read() instanceof List<?>;
+        assert jsonReader.read() instanceof Map<?,?>;
+        assert jsonReader.read().equals(123.0);
+        assert jsonReader.read().equals(JSONNull.INSTANCE);
+        jsonReader.expectEOF();
+
+        jsonReader = new JSONReader(new StringReader("true false [] {} 123 null"));
+        assert jsonReader.read().equals(true);
+        assert jsonReader.read().equals(false);
+        assert jsonReader.read() instanceof List<?>;
+        assert jsonReader.read() instanceof Map<?,?>;
+        assert jsonReader.read().equals(123.0);
+        assert jsonReader.read().equals(JSONNull.INSTANCE);
+        jsonReader.expectEOF();
+    }
+
+    @Test
+    public void testReadIndented() throws IOException {
+        Map<String, Object> m = (Map<String, Object>) JSONReader.readFrom(
+                        "{\n" +
+                        "  \"a\":123,\n" +
+                        "  \"b\":{\n" +
+                        "    \"x\":true,\n" +
+                        "    \"y\":false\n" +
+                        "  }\n" +
+                        "}");
+        assert m.get("a").equals(123.0);
+        m = (Map<String, Object>) m.get("b");
+        assert m.get("x").equals(true);
+        assert m.get("y").equals(false);
     }
 }

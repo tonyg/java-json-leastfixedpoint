@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.Reader;
 import java.io.StringReader;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +46,16 @@ import java.util.Map;
  * </ul>
  * <p>
  * Syntax errors are reported with JSONSyntaxError or, in case of short input, EOFException.
+ * <p>
+ * This class is able to read multiple adjacent JSON values from a single input stream. However, some care is needed
+ * when doing this, since this class maintains a one-character internal lookahead buffer. Reading a single JSON value
+ * generally consumes up to one character more than needed. For example, given a reader with ready input "123x",
+ * JSONReader will consume all four bytes. When reading multiple JSON values from a stream, it is important to use the
+ * same JSONReader object, since it will maintain its internal lookahead buffer between objects and so will not
+ * accidentally discard input.
+ * <p>
+ * Furthermore, when given a Reader that is not a LineNumberReader, this class creates a wrapping LineNumberReader,
+ * which may internally consume input from the underlying reader in a way not under our control.
  */
 public class JSONReader {
     private final StringBuilder buf = new StringBuilder();
@@ -75,16 +84,44 @@ public class JSONReader {
 
     /**
      * Reads and returns a single JSON value from the given Reader.
+     * Calls expectEOF() after reading, to ensure no trailing junk is present.
      */
     public static Object readFrom(Reader r) throws IOException {
-        return new JSONReader(r).read();
+        return readFrom(r, true);
     }
 
     /**
      * Reads and returns a single JSON value from the given input JSON source text.
+     * Calls expectEOF() after reading, to ensure no trailing junk is present.
      */
     public static Object readFrom(String s) throws IOException {
-        return readFrom(new StringReader(s));
+        return readFrom(new StringReader(s), true);
+    }
+
+    /**
+     * Reads and returns a single JSON value from the given input JSON source text.
+     * If ensureSingleValue is true, calls expectEOF() after reading, to ensure no trailing junk is present.
+     * Otherwise, ignores any input following the JSON value returned.
+     */
+    public static Object readFrom(String s, boolean ensureSingleValue) throws IOException {
+        return readFrom(new StringReader(s), ensureSingleValue);
+    }
+
+    /**
+     * Reads and returns a single JSON value from the given Reader.
+     * If ensureSingleValue is true, calls expectEOF() after reading, to ensure no trailing junk is present.
+     * Otherwise, leaves the given Reader in good condition to yield additional input.
+     *
+     * This is protected rather than public because reading multiple JSON values depends on the state of the
+     * internal lookahead buffer, which with this static method is clearly not preserved. It would be dangerous to
+     * encourage use of this method to read multiple JSON values from a stream. Instead, a long-running instance
+     * of JSONReader should be used to parse the whole stream.
+     */
+    protected static Object readFrom(Reader r, boolean ensureSingleValue) throws IOException {
+        JSONReader jsonReader = new JSONReader(r);
+        Object result = jsonReader.read();
+        if (ensureSingleValue) jsonReader.expectEOF();
+        return result;
     }
 
     protected void drop() throws IOException {
@@ -116,7 +153,7 @@ public class JSONReader {
     protected void skipWhiteSpace() throws IOException {
         if (atEOF()) drop(); // prime the buffer
         while (!atEOF()) {
-            while (Character.isWhitespace(curr())) drop();
+            while (Character.isWhitespace(this.buffer)) drop();
             if (checkDrop('/')) {
                 if (checkDrop('/')) {
                     //noinspection StatementWithEmptyBody
@@ -142,6 +179,26 @@ public class JSONReader {
      */
     public Object read() throws IOException {
         return valueGuard(_read());
+    }
+
+    /**
+     * As read(), but wraps the result in JSONValue.
+     */
+    public JSONValue readValue() throws IOException {
+        return JSONValue.wrap(read());
+    }
+
+    /**
+     * Consumes any whitespace in the stream, and returns normally if it then finds itself
+     * at the end of the stream. Throws JSONSyntaxError if, after consuming whitespace, some
+     * non-whitespace input remains to be consumed. Useful for enforcing rules about files
+     * containing some fixed number of JSON values and no more.
+     */
+    public void expectEOF() throws IOException {
+        skipWhiteSpace();
+        if (!atEOF()) {
+            throw new JSONSyntaxError("Expected, but did not see, end-of-file", reader.getLineNumber());
+        }
     }
 
     protected Object readAtom(String atom, Object value) throws IOException {
@@ -179,7 +236,7 @@ public class JSONReader {
         }
     }
 
-    protected Object object() throws IOException {
+    protected Map<String, Object> object() throws IOException {
         Map<String, Object> ret = new HashMap<>();
         Object _key = _read();
         if (_key == Lexeme.OBJECT_END) {
@@ -204,7 +261,7 @@ public class JSONReader {
         }
     }
 
-    protected Object array() throws IOException {
+    protected List<Object> array() throws IOException {
         List<Object> ret = new ArrayList<>();
         Object _value = _read();
         if (_value == Lexeme.ARRAY_END) {

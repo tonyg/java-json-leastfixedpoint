@@ -17,6 +17,8 @@
 
 package com.leastfixedpoint.json;
 
+import java.io.IOException;
+
 /**
  * Interface for classes that wish to control their own serialization.
  */
@@ -24,5 +26,5 @@ public interface JSONSerializable {
     /**
      * Called during serialization to JSON.
      */
-    void jsonSerialize(JSONWriter w);
+    void jsonSerialize(JSONWriter w) throws IOException;
 }

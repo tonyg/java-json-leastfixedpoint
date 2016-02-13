@@ -1,0 +1,2 @@
+ - see whether using BigDecimal would be more appropriate than Double
+ - implement a streaming tokenizer

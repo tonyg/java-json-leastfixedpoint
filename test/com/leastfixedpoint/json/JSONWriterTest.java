@@ -34,6 +34,7 @@ public class JSONWriterTest {
         checkWrite(1.23E09, "1.23E9");
         checkWrite(-1.23E-13, "-1.23E-13");
         checkWrite(1.23E-13, "1.23E-13");
+        checkWrite(JSONValue.wrap(1.23E-13), "1.23E-13");
     }
 
     @Test
@@ -46,6 +47,7 @@ public class JSONWriterTest {
         checkWrite("\n", "\"\\n\"");
         checkWrite("\uD834\uDD1E", "\"\uD834\udd1e\"");
         checkWrite("\u0080", "\"\\u0080\"");
+        checkWrite(JSONValue.wrap("hello"), "\"hello\"");
     }
 
     @Test
@@ -53,6 +55,8 @@ public class JSONWriterTest {
         checkWrite(true, "true");
         checkWrite(false, "false");
         checkWrite(JSONNull.INSTANCE, "null");
+        checkWrite(JSONValue.wrap(true), "true");
+        checkWrite(JSONValue.wrap(JSONNull.INSTANCE), "null");
     }
 
     @Test
@@ -65,6 +69,18 @@ public class JSONWriterTest {
         a.add("C");
         checkWrite(a, "[1,null,\"C\"]");
         checkWrite(new Object[] { new Object[] { new Object [] {} } }, "[[[]]]");
+    }
+
+    @Test
+    public void testValueWriting() throws JSONTypeError, JSONSerializationError {
+        checkWrite(JSONValue.newList()
+                        .add(1.0)
+                        .add(JSONNull.INSTANCE)
+                        .add("C")
+                        .add(JSONValue.newList().add(JSONValue.newMap()
+                                .put("x", true)
+                                .put("y", JSONValue.newMap().put("z", "z")))),
+                "[1,null,\"C\",[{\"x\":true,\"y\":{\"z\":\"z\"}}]]");
     }
 
     @Test(expectedExceptions = {JSONSerializationError.class})
