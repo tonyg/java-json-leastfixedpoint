@@ -105,6 +105,11 @@ public class JSONEventReader {
         }
     }
 
+    /** Returns true iff the parser is not mid-way through some object; that is, we are at a boundary between JSON values. */
+    public boolean atBoundary() {
+        return stateStack.size() == 0;
+    }
+
     protected void maybeEnterNested(Object token) throws JSONSyntaxError {
         if (token instanceof Lexeme) {
             switch ((Lexeme) token) {

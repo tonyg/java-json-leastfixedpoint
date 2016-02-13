@@ -72,4 +72,24 @@ public class JSONEventReaderTest {
         assert e.next() == null;
         assert e.next() == null; // yes, a second time
     }
+
+    @Test
+    public void testObjectBoundary() throws IOException {
+        JSONEventReader e = new JSONEventReader(new JSONReader(new StringReader("[1,2]true[]")));
+        assert e.atBoundary();
+        assert e.next().equals(JSONReader.Lexeme.ARRAY_START);
+        assert !e.atBoundary();
+        assert e.next().equals(new BigDecimal(1));
+        assert !e.atBoundary();
+        assert e.next().equals(new BigDecimal(2));
+        assert !e.atBoundary();
+        assert e.next().equals(JSONReader.Lexeme.ARRAY_END);
+        assert e.atBoundary();
+        assert e.next().equals(true);
+        assert e.atBoundary();
+        assert e.next().equals(JSONReader.Lexeme.ARRAY_START);
+        assert !e.atBoundary();
+        assert e.next().equals(JSONReader.Lexeme.ARRAY_END);
+        assert e.atBoundary();
+    }
 }
