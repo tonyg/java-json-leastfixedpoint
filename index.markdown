@@ -6,6 +6,7 @@ projecturl: "https://github.com/tonyg/java-json-leastfixedpoint"
 A package for JSON reading and writing for Java.
 
 It offers:
+
  - construction of natural Java representations of JSON values (see class comment for [JSONReader][])
  - optional indented printing of JSON values (see [JSONWriter][])
  - reading of sequential/adjacent/concatenated JSON values from a file or stream (e.g. a Socket; see [the TCP/IP JSON "echo" server example][example])
