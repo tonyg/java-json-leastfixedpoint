@@ -1,4 +1,6 @@
+---
 title: "com.leastfixedpoint.json"
+layout: skeleton
 projecturl: "https://github.com/tonyg/java-json-leastfixedpoint"
 ---
 A package for JSON reading and writing for Java.
