@@ -1,7 +1,7 @@
 /*
-   Copyright (c) 2006-2007 Frank Carver
-   Copyright (c) 2007-2016 Pivotal Software, Inc. All Rights Reserved
    Copyright (c) 2016 Tony Garnock-Jones
+   Copyright (c) 2007-2016 Pivotal Software, Inc. All Rights Reserved
+   Copyright (c) 2006-2007 Frank Carver
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
