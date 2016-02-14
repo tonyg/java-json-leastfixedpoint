@@ -42,6 +42,11 @@
     <jar destfile="build/lib/com.leastfixedpoint.json.jar" basedir="build/classes/main" />
   </target>
 
+  <target name="run" depends="jar">
+    <java classname="com.leastfixedpoint.json.examples.JSONEchoServer"
+	  classpath="build/classes/examples:build/lib/com.leastfixedpoint.json.jar"/>
+  </target>
+
   <target name="javadoc">
     <javadoc destdir="doc" access="public">
       <sourcepath path="src"/>
