@@ -157,7 +157,7 @@ public class JSONReader {
     protected void skipWhiteSpace() throws IOException {
         if (atEOF()) drop(); // prime the buffer
         while (!atEOF()) {
-            while (Character.isWhitespace(this.buffer)) drop();
+            while (Character.isWhitespace(this.buffer) || this.buffer == '\uFEFF' /* BOM */) drop();
             if (checkDrop('/')) {
                 if (checkDrop('/')) {
                     //noinspection StatementWithEmptyBody

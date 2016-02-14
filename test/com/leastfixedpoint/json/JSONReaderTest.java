@@ -52,6 +52,11 @@ public class JSONReaderTest {
     }
 
     @Test
+    public void testBOM() throws IOException {
+        checkRead("\uFEFF\"123\"", "123");
+    }
+
+    @Test
     public void testStrings() throws IOException {
         checkRead("\"123\"", "123");
         checkRead("\"\"", "");
