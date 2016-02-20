@@ -62,9 +62,12 @@ import java.util.Map;
  * class {@link JSONEventReader}.
  */
 public class JSONReader {
+    protected int NO_TOKEN = -2;
+    protected int EOF = -1;
+
     private final StringBuilder buf = new StringBuilder();
     protected LineNumberReader reader;
-    protected int buffer = -1;
+    protected int _buffer = NO_TOKEN;
 
     /**
      * Construct a reader that reads JSON text from the given Reader.
@@ -129,20 +132,27 @@ public class JSONReader {
     }
 
     protected void drop() throws IOException {
-        this.buffer = reader.read();
+        this._buffer = NO_TOKEN;
     }
 
-    protected boolean atEOF() {
-        return this.buffer == -1;
+    protected int buffer() throws IOException {
+        if (this._buffer == NO_TOKEN) {
+            this._buffer = reader.read();
+        }
+        return this._buffer;
     }
 
-    protected char curr() throws EOFException {
+    protected boolean atEOF() throws IOException {
+        return this.buffer() == EOF;
+    }
+
+    protected char curr() throws IOException {
         if (atEOF()) throw new EOFException();
-        return (char) this.buffer;
+        return (char) this._buffer;
     }
 
-    protected boolean check(char expected) {
-        return (this.buffer == expected);
+    protected boolean check(char expected) throws IOException {
+        return (this.buffer() == expected);
     }
 
     protected boolean checkDrop(char expected) throws IOException {
@@ -155,9 +165,8 @@ public class JSONReader {
     }
 
     protected void skipWhiteSpace() throws IOException {
-        if (atEOF()) drop(); // prime the buffer
         while (!atEOF()) {
-            while (Character.isWhitespace(this.buffer) || this.buffer == '\uFEFF' /* BOM */) drop();
+            while (Character.isWhitespace(this.buffer()) || this.buffer() == '\uFEFF' /* BOM */) drop();
             if (checkDrop('/')) {
                 if (checkDrop('/')) {
                     //noinspection StatementWithEmptyBody
@@ -367,7 +376,7 @@ public class JSONReader {
     }
 
     private void shiftDigits() throws IOException {
-        while (Character.isDigit(this.buffer)) {
+        while (Character.isDigit(this.buffer())) {
             shift();
         }
     }

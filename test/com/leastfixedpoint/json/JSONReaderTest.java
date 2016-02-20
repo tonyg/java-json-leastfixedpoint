@@ -244,7 +244,12 @@ public class JSONReaderTest {
         r = new LineNumberReader(new StringReader("[1,2]xy"));
         jsonReader = new JSONReader(r);
         assert jsonReader.read() instanceof List<?>;
-        assert r.read() == 'y';
+        assert r.read() == 'x';
+
+        r = new LineNumberReader(new StringReader("truexy"));
+        jsonReader = new JSONReader(r);
+        assert jsonReader.read().equals(true);
+        assert r.read() == 'x';
     }
 
     @Test
