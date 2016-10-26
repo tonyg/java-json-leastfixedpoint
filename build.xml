@@ -4,6 +4,7 @@
   </target>
 
   <property name="testng.jar" value="lib/testng/testng-6.9.10.jar"/>
+  <property file="build.properties"/>
 
   <taskdef resource="testngtasks" classpath="${testng.jar}"/>
 
@@ -39,12 +40,12 @@
 
   <target name="jar" depends="build">
     <mkdir dir="build/lib"/>
-    <jar destfile="build/lib/com.leastfixedpoint.json.jar" basedir="build/classes/main" />
+    <jar destfile="build/lib/${PROJECT}-${VERSION}.jar" basedir="build/classes/main" />
   </target>
 
   <target name="run" depends="jar">
     <java classname="com.leastfixedpoint.json.examples.JSONEchoServer"
-	  classpath="build/classes/examples:build/lib/com.leastfixedpoint.json.jar"/>
+	  classpath="build/classes/examples:build/lib/${PROJECT}-${VERSION}.jar"/>
   </target>
 
   <target name="javadoc">

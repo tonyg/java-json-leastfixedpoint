@@ -1,14 +1,14 @@
-PROJECT=com.leastfixedpoint.json
-VERSION=1.0
+# omg polyglot
+include build.properties
 
 JAVASOURCES=$(shell find examples src -iname '*.java')
 
-all: build/lib build/classes/main doc
+all: build/lib/${PROJECT}-${VERSION}.jar build/classes/main doc
 
 clean:
 	ant clean
 
-build/lib/${PROJECT}.jar: ${JAVASOURCES}
+build/lib/${PROJECT}-${VERSION}.jar: ${JAVASOURCES}
 	ant jar
 
 build/classes/examples build/classes/main: ${JAVASOURCES}
@@ -17,8 +17,8 @@ build/classes/examples build/classes/main: ${JAVASOURCES}
 doc:
 	ant javadoc
 
-run: build/classes/examples build/lib/${PROJECT}.jar
-	java -cp build/lib/${PROJECT}.jar:build/classes/examples \
+run: build/classes/examples build/lib/${PROJECT}-${VERSION}.jar
+	java -cp build/lib/${PROJECT}-${VERSION}.jar:build/classes/examples \
 		com.leastfixedpoint.json.examples.JSONEchoServer
 
 pages:
