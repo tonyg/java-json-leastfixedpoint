@@ -34,7 +34,19 @@ public class JSONValue implements JSONSerializable {
     }
 
     protected JSONValue(Object blob) {
-        this.blob = blob;
+        if (blob instanceof Number) {
+            if (blob instanceof BigDecimal) {
+                this.blob = blob;
+            } else if (blob instanceof Float || blob instanceof Double) {
+                this.blob = ((Number) blob).doubleValue();
+            } else if (blob instanceof BigInteger) {
+                this.blob = new BigDecimal((BigInteger) blob);
+            } else {
+                this.blob = new BigDecimal(((Number) blob).longValue());
+            }
+        } else {
+            this.blob = blob;
+        }
     }
 
     /** Extract the underlying value contained in this object. */
