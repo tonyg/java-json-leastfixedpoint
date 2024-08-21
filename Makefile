@@ -31,7 +31,8 @@ pages:
 
 publish: doc pages
 	rm -rf pages/doc
-	cp -r doc pages/.
+	mkdir -p pages/doc
+	cp -r doc/. pages/doc/.
 	(cd pages; git add -A)
 	-(cd pages; git commit -m "Update $$(date +%Y%m%d%H%M%S)")
 	(cd pages; git push)
