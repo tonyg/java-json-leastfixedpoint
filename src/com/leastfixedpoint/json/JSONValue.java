@@ -195,4 +195,14 @@ public class JSONValue implements JSONSerializable {
     public String toString() {
         return blob.toString();
     }
+
+    @Override
+    public boolean equals(Object other) {
+        return other.equals(blob);
+    }
+
+    @Override
+    public int hashCode() {
+        return blob.hashCode();
+    }
 }
