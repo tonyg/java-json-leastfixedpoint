@@ -4,7 +4,7 @@ layout: skeleton
 projecturl: "https://github.com/tonyg/java-json-leastfixedpoint"
 docurl: "doc/"
 ---
-A package for JSON reading and writing for Java.
+A package for JSON reading and writing for Java. [Source available on Github.]({{ page.projecturl }})
 
 It offers:
 
@@ -22,7 +22,7 @@ It offers:
 
 ### License
 
-Copyright (c) 2016 Tony Garnock-Jones  
+Copyright (c) 2016,2024 Tony Garnock-Jones  
 Copyright (c) 2007-2016 Pivotal Software, Inc. All Rights Reserved  
 Copyright (c) 2006-2007 Frank Carver
 
