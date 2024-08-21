@@ -98,11 +98,27 @@ public class JSONReader {
     }
 
     /**
+     * Reads and returns a single JSONValue from the given Reader.
+     * Calls expectEOF() after reading, to ensure no trailing junk is present.
+     */
+    public static JSONValue readValue(Reader r) throws IOException {
+        return JSONValue.wrap(readFrom(r));
+    }
+
+    /**
      * Reads and returns a single JSON value from the given input JSON source text.
      * Calls expectEOF() after reading, to ensure no trailing junk is present.
      */
     public static Object readFrom(String s) throws IOException {
         return readFrom(new StringReader(s), true);
+    }
+
+    /**
+     * Reads and returns a single JSONValue from the given input JSON source text.
+     * Calls expectEOF() after reading, to ensure no trailing junk is present.
+     */
+    public static JSONValue readValue(String s) throws IOException {
+        return JSONValue.wrap(readFrom(s));
     }
 
     /**
@@ -112,6 +128,15 @@ public class JSONReader {
      */
     public static Object readFrom(String s, boolean ensureSingleValue) throws IOException {
         return readFrom(new StringReader(s), ensureSingleValue);
+    }
+
+    /**
+     * Reads and returns a single JSONValue from the given input JSON source text.
+     * If ensureSingleValue is true, calls expectEOF() after reading, to ensure no trailing junk is present.
+     * Otherwise, ignores any input following the JSON value returned.
+     */
+    public static JSONValue readValue(String s, boolean ensureSingleValue) throws IOException {
+        return JSONValue.wrap(readFrom(s, ensureSingleValue));
     }
 
     /**
