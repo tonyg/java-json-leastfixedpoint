@@ -109,6 +109,29 @@ public class JSONValue implements JSONSerializable {
         throw new JSONTypeError(List.class, blob);
     }
 
+    /** Iterate over JSONValue-wrapped items in the underlying value, which is cast to a {@link List}
+     * @throws JSONTypeError if the underlying value is not a list. */
+    public Iterable<JSONValue> list() throws JSONTypeError {
+        return listIterable(listValue());
+    }
+
+    protected Iterable<JSONValue> listIterable(Collection<Object> xs) throws JSONTypeError {
+        return () -> {
+            var i = xs.iterator();
+            return new Iterator<JSONValue>() {
+                @Override
+                public boolean hasNext() {
+                    return i.hasNext();
+                }
+
+                @Override
+                public JSONValue next() {
+                    return wrap(i.next());
+                }
+            };
+        };
+    }
+
     /** Cast the underlying value to {@link Map}.
      * @throws JSONTypeError if it is not a map. */
     public Map<String,Object> mapValue() throws JSONTypeError {
@@ -118,6 +141,54 @@ public class JSONValue implements JSONSerializable {
             return m;
         }
         throw new JSONTypeError(Map.class, blob);
+    }
+
+    /** Iterate over keys of the underlying value, which is cast to a {@link Map}
+     * @throws JSONTypeError if the underlying value is not a map. */
+    public Iterable<String> mapKeys() throws JSONTypeError {
+        return mapValue().keySet();
+    }
+
+    /** Iterate over JSONValue-wrapped entries in the underlying value, which is cast to a {@link Map}
+     * @throws JSONTypeError if the underlying value is not a map. */
+    public Iterable<JSONValue> mapValues() throws JSONTypeError {
+        return listIterable(mapValue().values());
+    }
+
+    /** Iterate over JSONValue-wrapped entries in the underlying value, which is cast to a {@link Map}
+     * @throws JSONTypeError if the underlying value is not a map. */
+    public Iterable<Map.Entry<String,JSONValue>> mapEntries() throws JSONTypeError {
+        var m = mapValue().entrySet();
+        return () -> {
+            var i = m.iterator();
+            return new Iterator<Map.Entry<String,JSONValue>>() {
+                @Override
+                public boolean hasNext() {
+                    return i.hasNext();
+                }
+
+                @Override
+                public Map.Entry<String,JSONValue> next() {
+                    var e = i.next();
+                    return new Map.Entry<String,JSONValue>() {
+                        @Override
+                        public String getKey() {
+                            return e.getKey();
+                        }
+
+                        @Override
+                        public JSONValue getValue() {
+                            return wrap(e.getValue());
+                        }
+
+                        @Override
+                        public JSONValue setValue(JSONValue value) {
+                            return wrap(e.setValue(value.value()));
+                        }
+                    };
+                }
+            };
+        };
     }
 
     /** Retrieve the object at the index'th position in the underlying list.
