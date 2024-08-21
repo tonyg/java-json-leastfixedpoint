@@ -76,13 +76,11 @@ public class JSONValue implements JSONSerializable {
     }
 
     // Is this a good idea?
-    /** Extract a {@link BigDecimal} value from the underlying object, which must be either a BigDecimal already or
-     * a {@link BigInteger}.
-     * @throws JSONTypeError if it is neither. */
+    /** Extract a {@link BigDecimal} value from the underlying object.
+     * @throws JSONTypeError if it is not a {@link BigDecimal}. */
     public BigDecimal bigDecimalValue() throws JSONTypeError {
         if (blob instanceof BigDecimal) return ((BigDecimal) blob);
-        if (blob instanceof BigInteger) return new BigDecimal((BigInteger) blob);
-        throw new JSONTypeError(new Class[] { BigDecimal.class, BigInteger.class }, blob);
+        throw new JSONTypeError(BigDecimal.class, blob);
     }
 
     /** Extract a boolean value from an underlying {@link Boolean}.
