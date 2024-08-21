@@ -101,14 +101,22 @@ public class JSONValue implements JSONSerializable {
     /** Cast the underlying value to {@link List}.
      * @throws JSONTypeError if it is not a list. */
     public List<Object> listValue() throws JSONTypeError {
-        if (blob instanceof List<?>) return (List<Object>) blob;
+        if (blob instanceof List<?>) {
+            @SuppressWarnings("unchecked")
+            var xs = (List<Object>) blob;
+            return xs;
+        }
         throw new JSONTypeError(List.class, blob);
     }
 
     /** Cast the underlying value to {@link Map}.
      * @throws JSONTypeError if it is not a map. */
     public Map<String,Object> mapValue() throws JSONTypeError {
-        if (blob instanceof Map<?,?>) return (Map<String,Object>) blob;
+        if (blob instanceof Map<?,?>) {
+            @SuppressWarnings("unchecked")
+            var m = (Map<String,Object>) blob;
+            return m;
+        }
         throw new JSONTypeError(Map.class, blob);
     }
 
