@@ -18,7 +18,7 @@
     <repository>
       <id>github</id>
       <name>com.leastfixedpoint.json Packages</name>
-      <url>https://github.com/tonyg/java-json-leastfixedpoint</url>
+      <url>https://maven.pkg.github.com/tonyg/java-json-leastfixedpoint</url>
     </repository>
   </repositories>
 
