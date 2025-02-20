@@ -31,7 +31,6 @@ import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -49,11 +48,12 @@ import java.util.Map;
  * If a Map has a non-String key, or an unsupported object is discovered while writing,
  * JSONSerializationError will be thrown.
  */
-public class JSONWriter {
+public class JSONWriter<W extends Writer> {
     protected int indentLevel = 0;
-    protected Writer writer;
+    protected W writer;
     protected boolean indentMode;
     protected boolean sortKeys = true;
+    protected boolean allowJavaNull = false;
 
     /**
      * Serializes value as JSON, outputting to writer, without pretty indentation.
@@ -65,8 +65,8 @@ public class JSONWriter {
     /**
      * Serializes value as JSON, outputting to writer, with optional pretty indentation.
      */
-    public static void writeTo(Writer w, Object value, boolean indenting) throws IOException {
-        new JSONWriter(w, indenting).write(value);
+    public static <W extends Writer> void writeTo(W w, Object value, boolean indenting) throws IOException {
+        new JSONWriter<>(w, indenting).write(value);
     }
 
     /**
@@ -94,14 +94,14 @@ public class JSONWriter {
     /**
      * Construct a JSONWriter that will output on the given Writer, by default without pretty indentation.
      */
-    public JSONWriter(Writer writer) {
+    public JSONWriter(W writer) {
         this(writer, false);
     }
 
     /**
      * Construct a JSONWriter that will output on the given Writer, with optional pretty indentation.
      */
-    public JSONWriter(Writer writer, boolean indenting) {
+    public JSONWriter(W writer, boolean indenting) {
         this.writer = writer;
         this.indentMode = indenting;
     }
@@ -109,7 +109,7 @@ public class JSONWriter {
     /**
      * Retrieve the underlying Writer.
      */
-    public Writer getWriter() {
+    public W getWriter() {
         return this.writer;
     }
 
@@ -142,6 +142,20 @@ public class JSONWriter {
     }
 
     /**
+     * Answers true iff the writer allows java's null value to be written as JSON null.
+     */
+    public boolean getAllowJavaNull() {
+        return allowJavaNull;
+    }
+
+    /**
+     * If given true, allows java's null value to be written as JSON null; otherwise, requires nulls to be represented with instances of JSONNull.
+     */
+    public void setAllowJavaNull(boolean value) {
+        allowJavaNull = value;
+    }
+
+    /**
      * If pretty indentation is turned on, outputs a newline character followed by a number of spaces
      * corresponding to the current indentation level (which is not under direct control of any public methods)
      */
@@ -167,6 +181,7 @@ public class JSONWriter {
         else if (object instanceof Map) map((Map<?, ?>) object);
         else if (object instanceof Iterable) iterable((Iterable<?>) object);
         else if (object != null && object.getClass().isArray()) array(object);
+        else if (object == null && allowJavaNull) emit("null");
         else throw new JSONSerializationError("Cannot write object in JSON format: " + object);
     }
 

@@ -1,6 +1,8 @@
 package com.leastfixedpoint.json;
 
-import org.testng.annotations.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
 
 import java.io.EOFException;
 import java.io.IOException;
@@ -79,23 +81,23 @@ public class JSONReaderTest {
 
     @Test
     public void testArray() throws IOException {
-        ArrayList a = (ArrayList) JSONReader.readFrom("[]");
+        var a = (ArrayList<?>) JSONReader.readFrom("[]");
         assert a.size() == 0;
-        a = (ArrayList) JSONReader.readFrom("[1,null,\"C\"]");
+        a = (ArrayList<?>) JSONReader.readFrom("[1,null,\"C\"]");
         assert a.size() == 3;
         assert a.get(0).equals(BigDecimal.ONE);
         assert a.get(1) == JSONNull.INSTANCE;
         assert a.get(2).equals("C");
-        a = (ArrayList) JSONReader.readFrom("[1, null,\n\"C\"]");
+        a = (ArrayList<?>) JSONReader.readFrom("[1, null,\n\"C\"]");
         assert a.size() == 3;
         assert a.get(0).equals(BigDecimal.ONE);
         assert a.get(1) == JSONNull.INSTANCE;
         assert a.get(2).equals("C");
-        a = (ArrayList) JSONReader.readFrom("[ [ [] ] ]");
+        a = (ArrayList<?>) JSONReader.readFrom("[ [ [] ] ]");
         assert a.size() == 1;
-        a = (ArrayList) a.get(0);
+        a = (ArrayList<?>) a.get(0);
         assert a.size() == 1;
-        a = (ArrayList) a.get(0);
+        a = (ArrayList<?>) a.get(0);
         assert a.size() == 0;
     }
 
@@ -116,17 +118,17 @@ public class JSONReaderTest {
 
     @Test
     public void testMap() throws IOException {
-        Map m = (Map) JSONReader.readFrom("{}");
+        var m = (Map<?,?>) JSONReader.readFrom("{}");
         assert m.size() == 0;
-        m = (Map) JSONReader.readFrom("{\"a\": 123}");
+        m = (Map<?,?>) JSONReader.readFrom("{\"a\": 123}");
         assert m.size() == 1;
         assert m.get("a").equals(new BigDecimal(123.0));
-        m = (Map) JSONReader.readFrom("{\"a\": 123, \"b\": [null]}");
+        m = (Map<?,?>) JSONReader.readFrom("{\"a\": 123, \"b\": [null]}");
         assert m.size() == 2;
         assert m.get("a").equals(new BigDecimal(123.0));
         assert m.get("b") instanceof ArrayList;
-        assert ((ArrayList) m.get("b")).get(0) == JSONNull.INSTANCE;
-        m = (Map) JSONReader.readFrom("{\"a\":123,\"b\":234}");
+        assert ((ArrayList<?>) m.get("b")).get(0) == JSONNull.INSTANCE;
+        m = (Map<?,?>) JSONReader.readFrom("{\"a\":123,\"b\":234}");
         assert m.size() == 2;
         assert m.get("a").equals(new BigDecimal(123.0));
         assert m.get("b").equals(new BigDecimal(234.0));
@@ -172,9 +174,9 @@ public class JSONReaderTest {
         }
     }
 
-    @Test(expectedExceptions = {EOFException.class})
+    @Test
     public void testSpecialEOF1() throws IOException {
-        JSONReader.readFrom("{\"a\": 123, \"b: 234}");
+        assertThrows(EOFException.class, () -> JSONReader.readFrom("{\"a\": 123, \"b: 234}"));
     }
 
     @Test
@@ -224,9 +226,9 @@ public class JSONReaderTest {
         assert false : "Expected EOF exception";
     }
 
-    @Test(expectedExceptions = {JSONSyntaxError.class})
+    @Test
     public void testTrailingData1() throws IOException {
-        checkRead("true love waits", "you had me at 'true'");
+        assertThrows(JSONSyntaxError.class, () -> checkRead("true love waits", "you had me at 'true'"));
     }
 
     @Test
@@ -275,7 +277,7 @@ public class JSONReaderTest {
 
     @Test
     public void testReadIndented() throws IOException {
-        Map<String, Object> m = (Map<String, Object>) JSONReader.readFrom(
+        var m = (Map<?,?>) JSONReader.readFrom(
                         "{\n" +
                         "  \"a\":123,\n" +
                         "  \"b\":{\n" +
@@ -284,7 +286,7 @@ public class JSONReaderTest {
                         "  }\n" +
                         "}");
         assert m.get("a").equals(new BigDecimal(123.0));
-        m = (Map<String, Object>) m.get("b");
+        m = (Map<?,?>) m.get("b");
         assert m.get("x").equals(true);
         assert m.get("y").equals(false);
     }

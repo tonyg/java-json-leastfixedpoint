@@ -1,6 +1,8 @@
 package com.leastfixedpoint.json;
 
-import org.testng.annotations.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;
@@ -9,8 +11,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.testng.Assert.*;
 
 public class JSONWriterTest {
     public void checkWrite(Object o, String expected) throws JSONSerializationError {
@@ -89,23 +89,23 @@ public class JSONWriterTest {
                 "[1,null,\"C\",[{\"x\":true,\"y\":{\"z\":\"z\"}}]]");
     }
 
-    @Test(expectedExceptions = {JSONSerializationError.class})
+    @Test
     public void testWriteNullInArray() throws JSONSerializationError {
-        checkWrite(new Object[]{1.0, null, "C"}, "[1,null,\"C\"]");
+        assertThrows(JSONSerializationError.class, () -> checkWrite(new Object[]{1.0, null, "C"}, "[1,null,\"C\"]"));
     }
 
-    @Test(expectedExceptions = {JSONSerializationError.class})
+    @Test
     public void testWriteNullInArrayList() throws JSONSerializationError {
         List<Object> a = new ArrayList<>();
         a.add(1.0);
         a.add(null);
         a.add("C");
-        checkWrite(a, "[1,null,\"C\"]");
+        assertThrows(JSONSerializationError.class, () -> checkWrite(a, "[1,null,\"C\"]"));
     }
 
     @Test
     public void testMap() throws JSONSerializationError {
-        checkWrite(new HashMap(), "{}");
+        checkWrite(new HashMap<String,Object>(), "{}");
         Map<String,Object> m = new HashMap<>();
         m.put("a", 123.0);
         checkWrite(m, "{\"a\":123}");
@@ -134,15 +134,15 @@ public class JSONWriterTest {
         m.put("a", 123.0);
         m.put("b", new Object[] { JSONNull.INSTANCE });
 
-        JSONWriter jw = new JSONWriter(new StringWriter());
+        var jw = new JSONWriter<>(new StringWriter());
         jw.setSortKeys(false);
         jw.write(m);
-        String actual = ((StringWriter) jw.getWriter()).getBuffer().toString();
+        String actual = jw.getWriter().getBuffer().toString();
         assert actual.equals("{\"a\":123,\"b\":[null]}") ||
                 actual.equals("{\"b\":[null],\"a\":123}");
 
         m.put("b", 234.0);
-        jw = new JSONWriter(new StringWriter());
+        jw = new JSONWriter<>(new StringWriter());
         jw.setSortKeys(false);
         jw.write(m);
         actual = ((StringWriter) jw.getWriter()).getBuffer().toString();
@@ -150,32 +150,36 @@ public class JSONWriterTest {
                 actual.equals("{\"b\":234,\"a\":123}");
     }
 
-    @Test(expectedExceptions = {JSONSerializationError.class})
-    public void testWriteNullInMap() throws JSONSerializationError {
+    @Test
+    public void testWriteNullInMap() throws IOException {
         Map<String,Object> m = new HashMap<>();
         m.put("a", 123.0);
         m.put("b", new Object[] { null });
-        checkWrite(m, "{\"a\":123,\"b\":[null]}");
+        assertThrows(JSONSerializationError.class, () -> checkWrite(m, "{\"a\":123,\"b\":[null]}"));
+        var jw = new JSONWriter<>(new StringWriter());
+        jw.setAllowJavaNull(true);
+        jw.write(m);
+        assert jw.getWriter().getBuffer().toString().equals("{\"a\":123,\"b\":[null]}");
     }
 
-    @Test(expectedExceptions = {JSONSerializationError.class})
+    @Test
     public void testInvalidObject1() throws JSONSerializationError {
-        checkWrite(new Object(), "uh oh this shouldn't yield any answer");
+        assertThrows(JSONSerializationError.class, () -> checkWrite(new Object(), "uh oh this shouldn't yield any answer"));
     }
 
-    @Test(expectedExceptions = {JSONSerializationError.class})
+    @Test
     public void testInvalidObject2() throws JSONSerializationError {
         Map<Object,Object> m = new HashMap<>();
         m.put(123, 123.0);
-        checkWrite(m, "uh oh this shouldn't yield any answer");
+        assertThrows(JSONSerializationError.class, () -> checkWrite(m, "uh oh this shouldn't yield any answer"));
     }
 
-    @Test(expectedExceptions = {JSONSerializationError.class})
+    @Test
     public void testInvalidObject3() throws IOException {
         Map<Object,Object> m = new HashMap<>();
         m.put(123, 123.0);
-        JSONWriter jw = new JSONWriter(new StringWriter());
+        var jw = new JSONWriter<>(new StringWriter());
         jw.setSortKeys(false);
-        jw.write(m);
+        assertThrows(JSONSerializationError.class, () -> jw.write(m));
     }
 }

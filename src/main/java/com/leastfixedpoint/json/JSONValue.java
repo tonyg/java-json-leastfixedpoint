@@ -1,6 +1,7 @@
 package com.leastfixedpoint.json;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -250,13 +251,13 @@ public class JSONValue implements JSONSerializable {
      * @throws JSONTypeError if the underlying object is not any of these.
      */
     public int size() throws JSONTypeError {
-        if (blob instanceof Collection) return ((Collection) blob).size();
-        if (blob instanceof Map) return ((Map) blob).size();
+        if (blob instanceof Collection) return ((Collection<?>) blob).size();
+        if (blob instanceof Map) return ((Map<?,?>) blob).size();
         throw new JSONTypeError(new Class[] { Collection.class, Map.class }, blob);
     }
 
     @Override
-    public void jsonSerialize(JSONWriter w) throws IOException {
+    public <W extends Writer> void jsonSerialize(JSONWriter<W> w) throws IOException {
         w.write(blob);
     }
 

@@ -1,24 +1,17 @@
-# omg polyglot
-include build.properties
-
-JAVASOURCES=$(shell find examples src -iname '*.java')
-
-all: build/lib/${PROJECT}-${VERSION}.jar build/classes/main doc
+all:
+	mvn package
 
 clean:
-	ant clean
+	mvn clean
 
-build/lib/${PROJECT}-${VERSION}.jar: ${JAVASOURCES}
-	ant jar
+doc: target/reports/apidocs
 
-build/classes/examples build/classes/main: ${JAVASOURCES}
-	ant build
+target/reports/apidocs:
+	mvn javadoc:javadoc
 
-doc:
-	ant javadoc
-
-run: build/classes/examples build/lib/${PROJECT}-${VERSION}.jar
-	java -cp build/lib/${PROJECT}-${VERSION}.jar:build/classes/examples \
+run:
+	mvn compile test-compile
+	java -cp target/classes:target/test-classes \
 		com.leastfixedpoint.json.examples.JSONEchoServer
 
 pages:
@@ -29,10 +22,10 @@ pages:
 	@(echo 'Is the branch up to date? Press enter to continue.'; read dummy)
 	git clone -b gh-pages . pages
 
-publish: doc pages
+publish: target/reports/apidocs pages
 	rm -rf pages/doc
 	mkdir -p pages/doc
-	cp -r doc/. pages/doc/.
+	cp -r target/reports/apidocs/. pages/doc/.
 	(cd pages; git add -A)
 	-(cd pages; git commit -m "Update $$(date +%Y%m%d%H%M%S)")
 	(cd pages; git push)

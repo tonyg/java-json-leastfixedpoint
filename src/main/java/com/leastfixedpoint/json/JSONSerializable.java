@@ -26,5 +26,5 @@ public interface JSONSerializable {
     /**
      * Called during serialization to JSON.
      */
-    void jsonSerialize(JSONWriter w) throws IOException;
+    <W extends java.io.Writer> void jsonSerialize(JSONWriter<W> w) throws IOException;
 }

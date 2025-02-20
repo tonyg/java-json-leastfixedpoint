@@ -24,19 +24,20 @@ public class JSONEchoServer implements Runnable {
     public static void main(String[] args) throws IOException {
         int port = args.length > 0 ? Integer.parseInt(args[0]) : 45678;
         System.out.println("Creating listening socket on port " + port + "...");
-        ServerSocket s = new ServerSocket(port);
-        while (true) {
-            Socket c = s.accept();
-            System.out.println("Accepted connection " + c);
-            new Thread(new JSONEchoServer(c)).start();
+        try (ServerSocket s = new ServerSocket(port)) {
+            while (true) {
+                Socket c = s.accept();
+                System.out.println("Accepted connection " + c);
+                new Thread(new JSONEchoServer(c)).start();
+            }
         }
     }
 
     @Override
     public void run() {
         try {
-            JSONReader r = new JSONReader(new InputStreamReader(this.sock.getInputStream()));
-            JSONWriter w = new JSONWriter(new OutputStreamWriter(this.sock.getOutputStream()), true);
+            var r = new JSONReader(new InputStreamReader(this.sock.getInputStream()));
+            var w = new JSONWriter<>(new OutputStreamWriter(this.sock.getOutputStream()), true);
 
             while (true) {
                 try {

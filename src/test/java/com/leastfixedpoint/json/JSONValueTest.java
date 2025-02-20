@@ -1,6 +1,8 @@
 package com.leastfixedpoint.json;
 
-import org.testng.annotations.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -10,29 +12,29 @@ import java.util.HashSet;
 import java.util.Map;
 
 public class JSONValueTest {
-    @Test(expectedExceptions = {JSONTypeError.class})
+    @Test
     public void testAddToScalar() throws JSONTypeError {
-        JSONValue.wrap(123).add(234);
+        assertThrows(JSONTypeError.class, () -> JSONValue.wrap(123).add(234));
     }
 
-    @Test(expectedExceptions = {JSONTypeError.class})
+    @Test
     public void testAddToMap() throws JSONTypeError {
-        JSONValue.newMap().add(234);
+        assertThrows(JSONTypeError.class, () -> JSONValue.newMap().add(234));
     }
 
-    @Test(expectedExceptions = {JSONTypeError.class})
+    @Test
     public void testSetInMap() throws JSONTypeError {
-        JSONValue.newMap().set(0, 234);
+        assertThrows(JSONTypeError.class, () -> JSONValue.newMap().set(0, 234));
     }
 
-    @Test(expectedExceptions = {JSONTypeError.class})
+    @Test
     public void testPutInScalar() throws JSONTypeError {
-        JSONValue.wrap(123).put("a", 234);
+        assertThrows(JSONTypeError.class, () -> JSONValue.wrap(123).put("a", 234));
     }
 
-    @Test(expectedExceptions = {JSONTypeError.class})
+    @Test
     public void testPutInList() throws JSONTypeError {
-        JSONValue.newList().put("a", 234);
+        assertThrows(JSONTypeError.class, () -> JSONValue.newList().put("a", 234));
     }
 
     @Test
