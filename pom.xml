@@ -17,7 +17,7 @@
     <repository>
       <id>github</id>
       <name>GitHub tonyg Apache Maven Packages</name>
-      <url>https://maven.pkg.github.com/tonyg</url>
+      <url>https://maven.pkg.github.com/tonyg/java-json-leastfixedpoint</url>
     </repository>
   </distributionManagement>
 
