@@ -7,19 +7,30 @@
   <groupId>com.leastfixedpoint</groupId>
   <artifactId>leastfixedpoint-json</artifactId>
   <version>1.2</version>
+  <packaging>jar</packaging>
+
+  <name>${project.groupId}:${project.artifactId}</name>
+  <description>A package for JSON reading and writing for Java.</description>
+  <url>https://tonyg.github.io/java-json-leastfixedpoint/</url>
+
+  <developers>
+    <developer>
+      <name>Tony Garnock-Jones</name>
+      <email>tonyg@leastfixedpoint.com</email>
+      <organizationUrl>https://leastfixedpoint.com/</organizationUrl>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git://github.com/tonyg/java-json-leastfixedpoint.git</connection>
+    <developerConnection>scm:git:ssh://github.com:tonyg/java-json-leastfixedpoint.git</developerConnection>
+    <url>http://github.com/tonyg/java-json-leastfixedpoint/tree/master</url>
+  </scm>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.release>21</maven.compiler.release>
   </properties>
-
-  <distributionManagement>
-    <repository>
-      <id>github</id>
-      <name>GitHub tonyg Apache Maven Packages</name>
-      <url>https://maven.pkg.github.com/tonyg/java-json-leastfixedpoint</url>
-    </repository>
-  </distributionManagement>
 
   <dependencyManagement>
     <dependencies>
@@ -47,6 +58,22 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>3.5.1</version>
       </plugin>
+      <plugin>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <version>0.7.0</version>
+        <extensions>true</extensions>
+        <configuration>
+          <publishingServerId>central</publishingServerId>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
+
+  <licenses>
+    <license>
+      <name>The Apache License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
 </project>
