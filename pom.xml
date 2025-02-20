@@ -13,6 +13,14 @@
     <maven.compiler.release>21</maven.compiler.release>
   </properties>
 
+  <distributionManagement>
+    <repository>
+      <id>github</id>
+      <name>GitHub tonyg Apache Maven Packages</name>
+      <url>https://maven.pkg.github.com/tonyg</url>
+    </repository>
+  </distributionManagement>
+
   <dependencyManagement>
     <dependencies>
       <dependency>
