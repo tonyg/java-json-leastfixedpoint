@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.leastfixedpoint</groupId>
+  <artifactId>leastfixedpoint-json-example</artifactId>
+  <version>0.0.1</version>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.release>21</maven.compiler.release>
+    <exec.mainClass>com.leastfixedpoint.json.examples.JSONEchoServer</exec.mainClass>
+  </properties>
+
+  <repositories>
+    <repository>
+      <id>github</id>
+      <name>com.leastfixedpoint.json Packages</name>
+      <url>https://github.com/tonyg/java-json-leastfixedpoint</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.leastfixedpoint</groupId>
+      <artifactId>leastfixedpoint-json</artifactId>
+      <version>1.2</version>
+    </dependency>
+  </dependencies>
+</project>
