@@ -4,9 +4,9 @@ all:
 clean:
 	mvn clean
 
-doc: target/reports/apidocs
+doc: target/site/apidocs
 
-target/reports/apidocs:
+target/site/apidocs:
 	mvn javadoc:javadoc
 
 run:
@@ -22,10 +22,10 @@ pages:
 	@(echo 'Is the branch up to date? Press enter to continue.'; read dummy)
 	git clone -b gh-pages . pages
 
-publish: target/reports/apidocs pages
+publish: target/site/apidocs pages
 	rm -rf pages/doc
 	mkdir -p pages/doc
-	cp -r target/reports/apidocs/. pages/doc/.
+	cp -r target/site/apidocs/. pages/doc/.
 	(cd pages; git add -A)
 	-(cd pages; git commit -m "Update $$(date +%Y%m%d%H%M%S)")
 	(cd pages; git push)
