@@ -2,6 +2,14 @@
 
 A package for JSON reading and writing for Java.
 
+```xml
+<dependency>
+  <groupId>com.leastfixedpoint</groupId>
+  <artifactId>leastfixedpoint-json</artifactId>
+  <version>1.2</version>
+</dependency>
+```
+
 It offers:
 
  - construction of natural Java representations of JSON values (see class comment for [JSONReader][])
