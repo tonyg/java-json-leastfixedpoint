@@ -6,6 +6,14 @@ docurl: "doc/"
 ---
 A package for JSON reading and writing for Java. [Source available on Github.]({{ page.projecturl }})
 
+```xml
+<dependency>
+  <groupId>com.leastfixedpoint</groupId>
+  <artifactId>leastfixedpoint-json</artifactId>
+  <version>1.2</version>
+</dependency>
+```
+
 It offers:
 
  - construction of natural Java representations of JSON values (see class comment for [JSONReader][])
@@ -22,7 +30,7 @@ It offers:
 
 ### License
 
-Copyright (c) 2016,2024 Tony Garnock-Jones  
+Copyright (c) 2016,2024,2025 Tony Garnock-Jones  
 Copyright (c) 2007-2016 Pivotal Software, Inc. All Rights Reserved  
 Copyright (c) 2006-2007 Frank Carver
 
