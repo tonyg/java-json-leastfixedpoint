@@ -10,7 +10,7 @@ A package for JSON reading and writing for Java. [Source available on Github.]({
 <dependency>
   <groupId>com.leastfixedpoint</groupId>
   <artifactId>leastfixedpoint-json</artifactId>
-  <version>1.2</version>
+  <version>1.3</version>
 </dependency>
 ```
 
