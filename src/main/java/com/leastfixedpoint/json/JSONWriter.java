@@ -92,6 +92,18 @@ public class JSONWriter<W extends Writer> {
     }
 
     /**
+     * Returns JSON text corresponding to value.
+     * Unlike the overload writeToString(Object), never throws JSONSerializationError.
+     */
+    public static String writeToString(String value) {
+        try {
+            return writeToString((Object) value);
+        } catch (JSONSerializationError jse) {
+            throw new InternalError("Internal error: writeToString of String failed", jse);
+        }
+    }
+
+    /**
      * Construct a JSONWriter that will output on the given Writer, by default without pretty indentation.
      */
     public JSONWriter(W writer) {

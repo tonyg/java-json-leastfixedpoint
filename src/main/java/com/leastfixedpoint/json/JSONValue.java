@@ -16,7 +16,7 @@ public class JSONValue implements JSONSerializable {
 
     /** Returns a JSONValue wrapping the given object, unless the argument is null, in which case null is returned. */
     public static JSONValue wrap(Object blob) {
-        return (blob == null) ? null : new JSONValue(blob);
+        return (blob == null || blob instanceof JSONValue) ? (JSONValue) blob : new JSONValue(blob);
     }
 
     /** If given a JSONValue, extracts the underlying object; otherwise, simply returns the value given. */
@@ -55,24 +55,34 @@ public class JSONValue implements JSONSerializable {
         return this.blob;
     }
 
+    /** Answers true iff the underlying value is a String. */
+    public boolean isString() {
+        return blob instanceof String;
+    }
+
     /** Cast the underlying value to {@link String}.
      * @throws JSONTypeError if it is not a string. */
     public String stringValue() throws JSONTypeError {
-        if (blob instanceof String) return (String) blob;
+        if (isString()) return (String) blob;
         throw new JSONTypeError(String.class, blob);
+    }
+
+    /** Answers true iff the underlying value is a Number. */
+    public boolean isNumber() {
+        return blob instanceof Number;
     }
 
     /** Extract a long value from an underlying {@link Number}.
      *  @throws JSONTypeError if it is not a number. */
     public long longValue() throws JSONTypeError {
-        if (blob instanceof Number) return ((Number) blob).longValue();
+        if (isNumber()) return ((Number) blob).longValue();
         throw new JSONTypeError(Number.class, blob);
     }
 
     /** Extract a double value from an underlying {@link Number}.
      *  @throws JSONTypeError if it is not a number. */
     public double doubleValue() throws JSONTypeError {
-        if (blob instanceof Number) return ((Number) blob).doubleValue();
+        if (isNumber()) return ((Number) blob).doubleValue();
         throw new JSONTypeError(Number.class, blob);
     }
 
@@ -84,23 +94,38 @@ public class JSONValue implements JSONSerializable {
         throw new JSONTypeError(BigDecimal.class, blob);
     }
 
+    /** Answers true iff the underlying value is a Boolean. */
+    public boolean isBoolean() {
+        return blob instanceof Boolean;
+    }
+
     /** Extract a boolean value from an underlying {@link Boolean}.
      * @throws JSONTypeError if it is not a boolean. */
     public boolean booleanValue() throws JSONTypeError {
-        if (blob instanceof Boolean) return (boolean) blob;
+        if (isBoolean()) return (boolean) blob;
         throw new JSONTypeError(Boolean.class, blob);
+    }
+
+    /** Answers true iff the underlying value is a JSON null (i.e., {@link JSONNull#INSTANCE}). */
+    public boolean isNull() {
+        return blob instanceof JSONNull;
     }
 
     /** @throws JSONTypeError if the underlying object is not a JSON null (i.e., {@link JSONNull#INSTANCE}). */
     public void checkNull() throws JSONTypeError {
-        if (blob instanceof JSONNull) return;
+        if (isNull()) return;
         throw new JSONTypeError(JSONNull.class, blob);
+    }
+
+    /** Answers true iff the underlying value is a {@link List}. */
+    public boolean isList() {
+        return blob instanceof List<?>;
     }
 
     /** Cast the underlying value to {@link List}.
      * @throws JSONTypeError if it is not a list. */
     public List<Object> listValue() throws JSONTypeError {
-        if (blob instanceof List<?>) {
+        if (isList()) {
             @SuppressWarnings("unchecked")
             var xs = (List<Object>) blob;
             return xs;
@@ -131,10 +156,15 @@ public class JSONValue implements JSONSerializable {
         };
     }
 
+    /** Answers true iff the underlying value is a {@link Map}. */
+    public boolean isMap() {
+        return blob instanceof Map<?,?>;
+    }
+
     /** Cast the underlying value to {@link Map}.
      * @throws JSONTypeError if it is not a map. */
     public Map<String,Object> mapValue() throws JSONTypeError {
-        if (blob instanceof Map<?,?>) {
+        if (isMap()) {
             @SuppressWarnings("unchecked")
             var m = (Map<String,Object>) blob;
             return m;
@@ -194,7 +224,28 @@ public class JSONValue implements JSONSerializable {
      * @throws JSONTypeError if the underlying object is not a {@link List}.
      */
     public JSONValue get(int index) throws JSONTypeError {
-        return wrap(this.listValue().get(index));
+        final var xs = this.listValue();
+        return (index < xs.size()) ? wrap(xs.get(index)) : null;
+    }
+
+    /** Retrieve the object at the index'th position in the underlying list, or
+     * the given default value if there is no such index.
+     * @throws JSONTypeError if the underlying object is not a {@link List}.
+     */
+    public JSONValue get(int index, Object defaultValue) throws JSONTypeError {
+        final var xs = this.listValue();
+        return wrap(index < xs.size() ? xs.get(index) : defaultValue);
+    }
+
+    /** Retrieve the object at the index'th position in the underlying list, throwing
+     * JSONMissingIndexError if there is no such index.
+     * @throws JSONTypeError if the underlying object is not a {@link List}
+     * @throws JSONMissingIndexError if the list is missing the requested index
+     */
+    public JSONValue getRequired(int index) throws JSONSchemaError {
+        final var v = get(index);
+        if (v == null) throw new JSONMissingIndexError(index, this.listValue());
+        return v;
     }
 
     /** Replace the object at the index'th position in the underlying list.
@@ -220,6 +271,26 @@ public class JSONValue implements JSONSerializable {
      */
     public JSONValue get(String key) throws JSONTypeError {
         return wrap(this.mapValue().get(key));
+    }
+
+    /** Retrieve the object at the given key in the underlying map, or
+     * the given default value if there is no such key.
+     * @throws JSONTypeError if the underlying object is not a {@link Map}.
+     */
+    public JSONValue get(String key, Object defaultValue) throws JSONTypeError {
+        final var v = this.mapValue().get(key);
+        return wrap(v == null ? defaultValue : v);
+    }
+
+    /** Retrieve the object at the given key in the underlying map, throwing
+     * JSONMissingKeyError if there is no such key.
+     * @throws JSONTypeError if the underlying object is not a {@link Map}
+     * @throws JSONMissingKeyError if the map is missing the requested key
+     */
+    public JSONValue getRequired(String key) throws JSONSchemaError {
+        final var v = get(key);
+        if (v == null) throw new JSONMissingKeyError(key, this.mapValue());
+        return v;
     }
 
     /** Replace the object at the given key in the underlying map.

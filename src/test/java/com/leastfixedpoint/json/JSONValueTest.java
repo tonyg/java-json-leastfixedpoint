@@ -87,10 +87,44 @@ public class JSONValueTest {
     }
 
     @Test
+    public void testMapGetVariations() throws IOException {
+        var xs = JSONReader.readValue("{ \"a\": 1, \"b\": 2 }");
+        assert xs.isMap();
+        assert xs.get("a").longValue() == 1;
+        assert xs.get("z") == null;
+        assert xs.get("z", 123).longValue() == 123;
+        assert xs.getRequired("a").longValue() == 1;
+        try {
+            xs.getRequired("z");
+            assert false;
+        } catch (JSONSchemaError _e) {}
+    }
+
+    @Test
+    public void testListGetVariations() throws IOException {
+        var xs = JSONReader.readValue("[1, 2]");
+        assert xs.isList();
+        assert xs.get(0).longValue() == 1;
+        assert xs.get(2) == null;
+        assert xs.get(2, 123).longValue() == 123;
+        assert xs.getRequired(0).longValue() == 1;
+        try {
+            xs.getRequired(2);
+            assert false;
+        } catch (JSONSchemaError _e) {}
+    }
+
+    @Test
     public void testEquality() {
         assert JSONValue.wrap(1).equals(JSONValue.wrap(1));
         assert JSONValue.wrap(1).equals(JSONValue.wrap((long) 1));
         assert !JSONValue.wrap(1).equals(JSONValue.wrap(1.0));
         assert !JSONValue.wrap(1).equals(JSONValue.wrap("1"));
+    }
+
+    @Test
+    public void testAvoidingDoubleWrapping() {
+        assert JSONValue.wrap(1).value() instanceof Number;
+        assert JSONValue.wrap(JSONValue.wrap(1)).value() instanceof Number;
     }
 }

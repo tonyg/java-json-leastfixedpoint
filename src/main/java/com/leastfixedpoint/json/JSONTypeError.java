@@ -4,7 +4,7 @@ package com.leastfixedpoint.json;
  * Signalled to indicate a violation of a type constraint. For example, the program may be expecting a JSON number,
  * only to be given a JSON array.
  */
-public class JSONTypeError extends JSONError {
+public class JSONTypeError extends JSONSchemaError {
     protected Class<?>[] expected;
     protected Object actual;
 
