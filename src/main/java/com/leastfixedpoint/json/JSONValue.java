@@ -14,7 +14,7 @@ import java.util.*;
 public class JSONValue implements JSONSerializable {
     protected Object blob;
 
-    /** Returns a JSONValue wrapping the given object, unless the argument is null, in which case null is returned. */
+    /** Returns a JSONValue wrapping the given object, unless the argument is null or already a JSONValue, in which case it is returned directly. */
     public static JSONValue wrap(Object blob) {
         return (blob == null || blob instanceof JSONValue) ? (JSONValue) blob : new JSONValue(blob);
     }
