@@ -1,6 +1,7 @@
 package com.leastfixedpoint.json;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import org.junit.jupiter.api.Test;
 
@@ -289,5 +290,17 @@ public class JSONReaderTest {
         m = (Map<?,?>) m.get("b");
         assert m.get("x").equals(true);
         assert m.get("y").equals(false);
+    }
+
+    @Test
+    public void testIssue3() throws IOException {
+        // https://github.com/tonyg/java-json-leastfixedpoint/issues/3
+        try {
+            JSONReader.readFrom("{\"a\":\"1”}");
+            fail("Expected EOFException because the final quote is not ASCII 0x22");
+        } catch (EOFException e) {
+            // Success - the final doublequote in the input is not ASCII 0x22, so it keeps
+            // reading the string starting `1` `”` `}`, and then gets EOF.
+        }
     }
 }
