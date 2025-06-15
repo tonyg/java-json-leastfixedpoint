@@ -373,6 +373,7 @@ public class JSONReader {
                     int replacement = -1;
                     switch (curr()) {
                         case '"': replacement = '"'; break;
+                        case '\'': replacement = '\''; break;
                         case '\\': replacement = '\\'; break;
                         case '/': replacement = '/'; break;
 
