@@ -387,6 +387,13 @@ public class JSONReader {
                     buf.append((char) replacement);
                 }
             } else {
+                int b = this.buffer();
+                if (b >= 0 && b <= 0x1f) {
+                    // RFC 8259 section 7: "the characters that MUST be escaped:
+                    // quotation mark, reverse solidus, and the control characters
+                    // (U+0000 through U+001F)."
+                    syntaxError("Unicode scalar " + b + " must be escaped");
+                }
                 shift();
             }
         }

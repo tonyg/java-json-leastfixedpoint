@@ -66,7 +66,7 @@ public class JSONReaderTest {
         checkRead("\"\\\\\"", "\\");
         checkRead("\"\\\"\"", "\"");
         checkRead("\"x\\\"x\"", "x\"x");
-        checkRead("\"\n\"", "\n");
+        checkRead("\"\u0020\"", " ");
         checkRead("\"\\n\"", "\n");
         checkRead("\"\\uD834\\udd1e\"", "\uD834\uDD1E");
         checkRead("\"\uD834\udd1e\"", "\uD834\uDD1E");
