@@ -203,6 +203,15 @@ public class JSONReaderTest {
                 "flase",
                 "nil",
                 "\"\\?\"",
+
+                // RFC 8259: "the characters that MUST be escaped: quotation mark, reverse solidus, and the control characters (U+0000 through U+001F)."
+                "\"\n\"",
+                "\"\u0000\"",
+                "\"\u0008\"",
+                "\"\u0010\"",
+                "\"\u0018\"",
+                "\"\u001f\"",
+
                 "/* invalid */123",
                 "/* invalid */\n123",
                 "/- invalid\n123",
